@@ -30,6 +30,7 @@ export default defineConfig({
     {
       path: '/',
       component: '../layouts/BlankLayout',
+      // redirect: '/user/login',
       routes: [
         {
           path: '/user',

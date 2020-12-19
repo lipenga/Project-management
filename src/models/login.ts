@@ -5,6 +5,7 @@ import { fakeAccountLogin } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { message } from 'antd';
+import { NorthIsLandObj } from '@/TypeConstant/stroge'
 
 export interface StateType {
   status?: 'ok' | 'error';
@@ -64,7 +65,14 @@ const Model: LoginModelType = {
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       // 清理掉，权限标识 和token标识
-      window.localStorage.setItem('antd-pro-authority', '[]')
+
+      localStorage.setItem('NorthIsLandObj', JSON.stringify({
+        ...NorthIsLandObj,
+        token: '',
+        routerConfig: '',
+        authority: []
+      }))
+
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({
           pathname: '/user/login',

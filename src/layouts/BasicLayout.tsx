@@ -20,8 +20,7 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';
 import { getMatchMenu } from '@umijs/route-utils'
-import { rgb2arr } from '@antv/l7';
-
+import { NorthIsLandObj } from '@/TypeConstant/stroge'
 
 const noMatch = (
   <Result
@@ -187,10 +186,17 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
 
         // 底部 版权渲染器
         footerRender={() => defaultFooterDom}
-        menuDataRender={(a, b, c) => {
-          // window.localStorage.setItem('routerConfig', JSON.stringify(menuDataRender(a, b, c)))
+        menuDataRender={(a,) => {
+          return menuDataRender(a)
+          // try {
+          //   let data = menuDataRender(a,)
+          //   // localStorage.setItem('NorthIsLandObj', JSON.stringify({ ...NorthIsLandObj, routerConfig: data }))
+          //   return menuDataRender(a)
+          // } catch (error) {
+          //   console.log('error==>', error);
+          //   return menuDataRender(a,)
+          // }
 
-          return menuDataRender(a, b, c)
         }}
 
         rightContentRender={() => <RightContent />}  // 个人中心操控制器

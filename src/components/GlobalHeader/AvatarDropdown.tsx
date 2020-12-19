@@ -35,9 +35,6 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
   };
 
   render(): React.ReactNode {
-
-
-    let data = JSON.parse(window.localStorage.getItem('antd-pro-use') || '')
     const {
       currentUser = {
         avatar: '',

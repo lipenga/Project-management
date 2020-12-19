@@ -8,23 +8,23 @@
 export default {
   dev: {
     '/api/': {
-      target: 'http://localhost:3000',
+      target: 'http://112.124.109.250:3045',
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
     },
   },
   test: {
     '/api/': {
-      target: 'https://preview.pro.ant.design',
+      target: 'http://112.124.109.250:3030',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api': '' },
     },
   },
   pre: {
     '/api/': {
-      target: 'your pre url',
+      target: 'http://112.124.109.250:3555',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api': '' },
     },
   },
 };

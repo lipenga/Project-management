@@ -4,7 +4,7 @@ import { CURRENT } from './renderAuthorize';
 import PromiseRender from './PromiseRender';
 import { deepFind } from '@/utils/utils.ts'
 import { history, } from 'umi';
-
+import { NorthIsLandObj } from '@/TypeConstant/stroge'
 
 export type IAuthorityType =
   | undefined
@@ -28,6 +28,11 @@ const checkPermissions = <T, K>(
   Exception: K,
 ): T | K | React.ReactNode => {
 
+  // 初始化本地持久数据存储
+  if (!JSON.parse(localStorage.getItem('NorthIsLandObj') || 'false')) {
+    localStorage.setItem('NorthIsLandObj', JSON.stringify(NorthIsLandObj))
+  }
+
   /**
  * 场景判断
  * 1. token没有时，也没有登录时，authority是undefined 
@@ -44,17 +49,17 @@ const checkPermissions = <T, K>(
  */
 
 
-  let CrunterRouters = JSON.parse(window.localStorage.getItem('routerConfig') || '[]')
+  let CrunterRouters = JSON.parse(window.localStorage.getItem('NorthIsLandObj') || '[]')
 
-  if (!authority && !currentAuthority.length) {
+  if (!CrunterRouters.token || CrunterRouters.token == '') {
     history.push('/user/login',)
     return <> </>
   }
 
-  if (!deepFind(CrunterRouters, (v) => v.path == history.location?.pathname, 'children')) {
-    history.push('/',)
-    return target
-  }
+  // if (!deepFind(CrunterRouters, (v) => v.path == history.location?.pathname, 'children')) {
+  //   history.push('/',)
+  //   return target
+  // }
 
   // Retirement authority, return target; 正常走流程
   if (!authority) {

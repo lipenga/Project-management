@@ -8,7 +8,7 @@ import { getPageQuery, } from '@/utils/utils';
 import { history } from 'umi'
 import { stringify } from 'querystring'
 import { message } from 'antd';
-
+import { NorthIsLandObj } from '@/TypeConstant/stroge'
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
   201: '新建或修改数据成功。',
@@ -75,8 +75,15 @@ const request = extend({
   credentials: 'include', // 默认请求是否带上cookie
 });
 
+
 // 请求拦截
 request.interceptors.request.use((url, options) => {
+  let token = ''
+  try {
+    token = JSON.parse(localStorage.getItem('NorthIsLandObj'))?.token
+  } catch (error) {
+  }
+
   return {
     url: url,
     options: {
@@ -84,7 +91,7 @@ request.interceptors.request.use((url, options) => {
       interceptors: true,
       headers: {
         ...options.headers,
-        'token': JSON.parse(localStorage.getItem('antd-pro-token')),
+        'token': token
       }
     },
   };

@@ -5,7 +5,7 @@ import { fakeAccountLogin, getFakeCaptcha } from './service';
 export function getPageQuery() {
   return parse(window.location.href.split('?')[1]);
 }
-
+import { NorthIsLandObj } from '@/TypeConstant/stroge'
 
 export function setAuthority(value: any) {
 
@@ -13,10 +13,15 @@ export function setAuthority(value: any) {
   const { access_token, user } = value
   const { rule } = user
   let authority = rule?.rules?.split(',') || []
-  localStorage.setItem('antd-pro-token', JSON.stringify(access_token))
-  localStorage.setItem('antd-pro-authority', JSON.stringify(authority));
-  localStorage.setItem('antd-pro-use', JSON.stringify(user));
 
+  localStorage.setItem('NorthIsLandObj', JSON.stringify({
+    ...NorthIsLandObj,
+    token: access_token || '',
+    authority: authority || []
+  }))
+  // localStorage.setItem('antd-pro-token', JSON.stringify(access_token))
+  // localStorage.setItem('antd-pro-authority', JSON.stringify(authority));
+  // localStorage.setItem('antd-pro-use', JSON.stringify(user));
   // hard code
   // reload Authorized component
   try {
