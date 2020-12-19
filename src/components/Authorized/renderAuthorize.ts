@@ -3,6 +3,7 @@
 let CURRENT: string | string[] = 'NULL';
 
 type CurrentAuthorityType = string | string[] | (() => typeof CURRENT);
+
 /**
  * use  authority or getAuthority
  * @param {string|()=>String} currentAuthority
@@ -25,6 +26,7 @@ const renderAuthorize = <T>(Authorized: T): ((currentAuthority: CurrentAuthority
   }
   return Authorized;
 };
+
 
 export { CURRENT };
 export default <T>(Authorized: T) => renderAuthorize<T>(Authorized);

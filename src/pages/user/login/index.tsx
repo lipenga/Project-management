@@ -1,13 +1,15 @@
 import { AlipayCircleOutlined, TaobaoCircleOutlined, WeiboCircleOutlined } from '@ant-design/icons';
-import { Alert, Checkbox } from 'antd';
+import { Alert, message } from 'antd';
 import React, { useState } from 'react';
-import { Dispatch, Link, connect } from 'umi';
+import { Dispatch, Link, connect, history } from 'umi';
 import { StateType } from './model';
 import styles from './style.less';
-import { LoginParamsType } from './service';
 import LoginFrom from './components/Login';
+import { useRequest } from 'ahooks'
+import { registing } from './service'
 
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginFrom;
+const { Tab, UserName, Password, Mobile, Captcha, Submit, Email } = LoginFrom;
+
 interface LoginProps {
   dispatch: Dispatch;
   userAndlogin: StateType;
@@ -28,12 +30,11 @@ const LoginMessage: React.FC<{
 );
 
 const Login: React.FC<LoginProps> = (props) => {
-  const { userAndlogin = {}, submitting } = props;
-  const { status, type: loginType } = userAndlogin;
+  const { submitting } = props;
   const [autoLogin, setAutoLogin] = useState(true);
-  const [type, setType] = useState<string>('account');
+  const [type, setType] = useState<string>('account');  // 登录还是注册
 
-  const handleSubmit = (values: LoginParamsType) => {
+  const handleSubmit = (values: any) => {
     const { dispatch } = props;
     dispatch({
       type: 'userAndlogin/login',
@@ -43,17 +44,32 @@ const Login: React.FC<LoginProps> = (props) => {
       },
     });
   };
+
+  // 进行注册
+  const { run: useRegiste, loading: Reloading } = useRequest(registing, {
+    manual: true,
+    onSuccess: (res) => {
+      message.success('注册成功！')
+      history.push('/')
+    }
+  })
+
   return (
     <div className={styles.main}>
-      <LoginFrom activeKey={type} onTabChange={setType} onSubmit={handleSubmit}>
-        <Tab key="account" tab="账户密码登录">
-          {status === 'error' && loginType === 'account' && !submitting && (
-            <LoginMessage content="账户或密码错误（admin/ant.design）" />
-          )}
-
+      <LoginFrom activeKey={type} onTabChange={setType} onSubmit={(a, b, c, d) => {
+        console.log('a,b,c,d', a, b, c, d);
+        if (a.email) {
+          a.rule = '5fdda5dfbdef57391ca93070' // 硬编码
+          useRegiste(a)
+        } else {
+          handleSubmit(a)
+        }
+      }
+      }>
+        <Tab key="account" tab="用户登录">
           <UserName
-            name="userName"
-            placeholder="用户名: admin or user"
+            name="username"
+            placeholder="用户名"
             rules={[
               {
                 required: true,
@@ -63,7 +79,7 @@ const Login: React.FC<LoginProps> = (props) => {
           />
           <Password
             name="password"
-            placeholder="密码: ant.design"
+            placeholder="密码"
             rules={[
               {
                 required: true,
@@ -72,12 +88,30 @@ const Login: React.FC<LoginProps> = (props) => {
             ]}
           />
         </Tab>
-        <Tab key="mobile" tab="手机号登录">
-          {status === 'error' && loginType === 'mobile' && !submitting && (
-            <LoginMessage content="验证码错误" />
-          )}
-          <Mobile
-            name="mobile"
+        <Tab key="mobile" tab="用户注册">
+
+          <UserName
+            name="username"
+            placeholder="用户名"
+            rules={[
+              {
+                required: true,
+                message: '请输入用户名!',
+              },
+            ]}
+          />
+          <Password
+            name="password"
+            placeholder="密码"
+            rules={[
+              {
+                required: true,
+                message: '请输入密码！',
+              },
+            ]}
+          />
+          <UserName
+            name="phoneNumber"
             placeholder="手机号"
             rules={[
               {
@@ -90,7 +124,20 @@ const Login: React.FC<LoginProps> = (props) => {
               },
             ]}
           />
+
+          <Mobile
+            name="email"
+            placeholder="邮箱"
+            rules={[
+              {
+                required: true,
+                message: '邮箱',
+              },
+            ]}
+          />
+
           <Captcha
+            style={{ marginBottom: -50 }}
             name="captcha"
             placeholder="验证码"
             countDown={120}
@@ -104,28 +151,7 @@ const Login: React.FC<LoginProps> = (props) => {
             ]}
           />
         </Tab>
-        <div>
-          <Checkbox checked={autoLogin} onChange={(e) => setAutoLogin(e.target.checked)}>
-            自动登录
-          </Checkbox>
-          <a
-            style={{
-              float: 'right',
-            }}
-          >
-            忘记密码
-          </a>
-        </div>
-        <Submit loading={submitting}>登录</Submit>
-        <div className={styles.other}>
-          其他登录方式
-          <AlipayCircleOutlined className={styles.icon} />
-          <TaobaoCircleOutlined className={styles.icon} />
-          <WeiboCircleOutlined className={styles.icon} />
-          <Link className={styles.register} to="/user/register">
-            注册账户
-          </Link>
-        </div>
+        <Submit style={{ marginTop: -20 }} loading={submitting || Reloading}>登录</Submit>
       </LoginFrom>
     </div>
   );

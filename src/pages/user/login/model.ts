@@ -2,14 +2,21 @@ import { Effect, history, Reducer } from 'umi';
 import { message } from 'antd';
 import { parse } from 'qs';
 import { fakeAccountLogin, getFakeCaptcha } from './service';
-
 export function getPageQuery() {
   return parse(window.location.href.split('?')[1]);
 }
 
-export function setAuthority(authority: string | string[]) {
-  const proAuthority = typeof authority === 'string' ? [authority] : authority;
-  localStorage.setItem('antd-pro-authority', JSON.stringify(proAuthority));
+
+export function setAuthority(value: any) {
+
+  // 登录之后设置权限
+  const { access_token, user } = value
+  const { rule } = user
+  let authority = rule?.rules?.split(',') || []
+  localStorage.setItem('antd-pro-token', JSON.stringify(access_token))
+  localStorage.setItem('antd-pro-authority', JSON.stringify(authority));
+  localStorage.setItem('antd-pro-use', JSON.stringify(user));
+
   // hard code
   // reload Authorized component
   try {
@@ -17,9 +24,8 @@ export function setAuthority(authority: string | string[]) {
       (window as any).reloadAuthorized();
     }
   } catch (error) {
-    // do not need do anything
+    console.log('error', error);
   }
-
   return authority;
 }
 
@@ -50,13 +56,18 @@ const Model: ModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
+      let response = ''
+      try {
+        response = yield call(fakeAccountLogin, payload);
+      } catch (error) {
+        console.log('error', error);
+      }
       yield put({
         type: 'changeLoginStatus',
         payload: response,
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (response.access_token) {
         message.success('登录成功！');
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
@@ -74,6 +85,8 @@ const Model: ModelType = {
           }
         }
         history.replace(redirect || '/');
+      } else {
+        // message.error('登录错误')
       }
     },
 
@@ -84,7 +97,7 @@ const Model: ModelType = {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      setAuthority(payload);
       return {
         ...state,
         status: payload.status,

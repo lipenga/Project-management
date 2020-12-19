@@ -3,7 +3,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Link, SelectLang, useIntl, ConnectProps, connect, FormattedMessage } from 'umi';
 import React from 'react';
 import { ConnectState } from '@/models/connect';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 import styles from './UserLayout.less';
 
 export interface UserLayoutProps extends Partial<ConnectProps> {
@@ -13,12 +13,16 @@ export interface UserLayoutProps extends Partial<ConnectProps> {
 }
 
 const UserLayout: React.FC<UserLayoutProps> = (props) => {
+
+  // state
   const {
     route = {
       routes: [],
     },
   } = props;
+
   const { routes = [] } = route;
+
   const {
     children,
     location = {
@@ -26,13 +30,18 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
     },
   } = props;
   const { formatMessage } = useIntl();
+
   const { breadcrumb } = getMenuData(routes);
+
+  // ComponentsConfig
   const title = getPageTitle({
     pathname: location.pathname,
     formatMessage,
     breadcrumb,
     ...props,
   });
+
+  // rennder
   return (
     <HelmetProvider>
       <Helmet>
@@ -49,13 +58,13 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
             <div className={styles.header}>
               <Link to="/">
                 <img alt="logo" className={styles.logo} src={logo} />
-                <span className={styles.title}>Ant Design</span>
+                <span className={styles.title}>NorthIsland-北岛</span>
               </Link>
             </div>
             <div className={styles.desc}>
               <FormattedMessage
                 id="pages.layouts.userLayout.title"
-                defaultMessage="Ant Design 是西湖区最具影响力的 Web 设计规范"
+                defaultMessage="NorthIsland-北岛项目组，极具竞争力的前端团队"
               />
             </div>
           </div>

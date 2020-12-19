@@ -28,6 +28,9 @@ interface LoginType extends React.FC<LoginProps> {
   Password: React.FunctionComponent<LoginItemProps>;
   Mobile: React.FunctionComponent<LoginItemProps>;
   Captcha: React.FunctionComponent<LoginItemProps>;
+  // 自研
+  Email: React.FunctionComponent<LoginItemProps>;
+
 }
 
 const Login: LoginType = (props) => {
@@ -98,8 +101,8 @@ const Login: LoginType = (props) => {
               {otherChildren}
             </React.Fragment>
           ) : (
-            props.children
-          )}
+              props.children
+            )}
         </Form>
       </div>
     </LoginContext.Provider>
@@ -113,5 +116,6 @@ Login.UserName = LoginItem.UserName;
 Login.Password = LoginItem.Password;
 Login.Mobile = LoginItem.Mobile;
 Login.Captcha = LoginItem.Captcha;
+Login.Email = LoginItem.Email;
 
 export default Login;

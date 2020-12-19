@@ -63,6 +63,8 @@ const Model: LoginModelType = {
     logout() {
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
+      // 清理掉，权限标识 和token标识
+      window.localStorage.setItem('antd-pro-authority', '[]')
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({
           pathname: '/user/login',

@@ -6,7 +6,7 @@ import { FormItemProps } from 'antd/es/form/FormItem';
 import ItemMap from './map';
 import LoginContext, { LoginContextProps } from './LoginContext';
 import styles from './index.less';
-import { getFakeCaptcha } from '../../service';
+import { getCode } from '../../service';
 
 export type WrappedLoginItemProps = LoginItemProps;
 export type LoginItemKeyType = keyof typeof ItemMap;
@@ -15,6 +15,7 @@ export interface LoginItemType {
   Password: React.FC<WrappedLoginItemProps>;
   Mobile: React.FC<WrappedLoginItemProps>;
   Captcha: React.FC<WrappedLoginItemProps>;
+  Email: React.FC<WrappedLoginItemProps>;
 }
 
 export interface LoginItemProps extends Partial<FormItemProps> {
@@ -76,11 +77,12 @@ const LoginItem: React.FC<LoginItemProps> = (props) => {
   } = props;
 
   const onGetCaptcha = useCallback(async (mobile: string) => {
-    const result = await getFakeCaptcha(mobile);
-    if (result === false) {
+
+    const result = await getCode(mobile);
+    if (!result) {
       return;
     }
-    message.success('获取验证码成功！验证码为：1234');
+    message.success(`获取验证码成功！验证码为：${result.message}`);  // 
     setTiming(true);
   }, []);
 
@@ -127,7 +129,7 @@ const LoginItem: React.FC<LoginItemProps> = (props) => {
                 className={styles.getCaptcha}
                 size="large"
                 onClick={() => {
-                  const value = getFieldValue('mobile');
+                  const value = getFieldValue('email');
                   onGetCaptcha(value);
                 }}
               >

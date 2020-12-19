@@ -10,7 +10,7 @@ export default defineConfig({
     hmr: true,
   },
   history: {
-    type: 'browser',
+    type: 'browser',  // 路由模式
   },
   locale: {
     // default zh-CN
@@ -33,7 +33,7 @@ export default defineConfig({
       routes: [
         {
           path: '/user',
-          component: '../layouts/UserLayout',
+          component: '../layouts/UserLayout',  // 官方文档
           routes: [
             {
               path: '/user',
@@ -46,18 +46,6 @@ export default defineConfig({
               component: './user/login',
             },
             {
-              name: 'register-result',
-              icon: 'smile',
-              path: '/user/register-result',
-              component: './user/register-result',
-            },
-            {
-              name: 'register',
-              icon: 'smile',
-              path: '/user/register',
-              component: './user/register',
-            },
-            {
               component: '404',
             },
           ],
@@ -65,253 +53,119 @@ export default defineConfig({
         {
           path: '/',
           component: '../layouts/BasicLayout',
-          Routes: ['src/pages/Authorized'],
-          authority: ['admin', 'user'],
           routes: [
+            //  首页
             {
               path: '/',
-              redirect: '/dashboard/analysis',
+              redirect: '/dashboard',  // 首页就是分析页
             },
             {
               path: '/dashboard',
-              name: 'dashboard',
+              name: '统计',
               icon: 'dashboard',
+              component: './dashboard/analysis'
+            },
+
+            // 项目管理
+            {
+              path: '/project',
+              icon: 'form',
+              name: '项目管理',
+              Routes: ['src/pages/Authorized'],
+              authority: ['View', 'Edit', 'Super'],
               routes: [
                 {
                   path: '/',
-                  redirect: '/dashboard/analysis',
+                  redirect: '/project/list',
                 },
                 {
-                  name: 'analysis',
+                  name: '项目列表',
                   icon: 'smile',
-                  path: '/dashboard/analysis',
+                  path: '/project/list',
                   component: './dashboard/analysis',
                 },
                 {
-                  name: 'monitor',
+                  name: '项目成员管理',
                   icon: 'smile',
-                  path: '/dashboard/monitor',
-                  component: './dashboard/monitor',
+                  path: '/project/pro_roles',
+                  component: './dashboard/analysis',
                 },
                 {
-                  name: 'workplace',
+                  name: '项目类型管理',
                   icon: 'smile',
-                  path: '/dashboard/workplace',
-                  component: './dashboard/workplace',
+                  path: '/project/pro_category',
+                  component: './dashboard/analysis',
+                },
+                {
+                  name: '项目详情',
+                  icon: 'smile',
+                  path: '/project/detail',
+                  authority: [],
+                  component: './dashboard/analysis',
+                },
+                {
+                  component: '404',
                 },
               ],
             },
+
+            // 任务管理 
             {
-              path: '/form',
-              icon: 'form',
-              name: 'form',
-              routes: [
-                {
-                  path: '/',
-                  redirect: '/form/basic-form',
-                },
-                {
-                  name: 'basic-form',
-                  icon: 'smile',
-                  path: '/form/basic-form',
-                  component: './form/basic-form',
-                },
-                {
-                  name: 'step-form',
-                  icon: 'smile',
-                  path: '/form/step-form',
-                  component: './form/step-form',
-                },
-                {
-                  name: 'advanced-form',
-                  icon: 'smile',
-                  path: '/form/advanced-form',
-                  component: './form/advanced-form',
-                },
-              ],
-            },
-            {
-              path: '/list',
+              path: '/task',
               icon: 'table',
-              name: 'list',
+              name: '任务管理',
+              Routes: ['src/pages/Authorized'],  // 注意这里的权限，这里的权限仅仅是用于展示，左边的菜单而已
+              authority: ['View', 'Edit', 'Super'], // 这个权限回传入进去
               routes: [
                 {
-                  path: '/list/search',
-                  name: 'search-list',
-                  component: './list/search',
-                  routes: [
-                    {
-                      path: '/list/search',
-                      redirect: '/list/search/articles',
-                    },
-                    {
-                      name: 'articles',
-                      icon: 'smile',
-                      path: '/list/search/articles',
-                      component: './list/search/articles',
-                    },
-                    {
-                      name: 'projects',
-                      icon: 'smile',
-                      path: '/list/search/projects',
-                      component: './list/search/projects',
-                    },
-                    {
-                      name: 'applications',
-                      icon: 'smile',
-                      path: '/list/search/applications',
-                      component: './list/search/applications',
-                    },
-                  ],
-                },
-                {
                   path: '/',
-                  redirect: '/list/table-list',
+                  redirect: '/task/list',
                 },
                 {
-                  name: 'table-list',
+                  name: '任务列表',
                   icon: 'smile',
-                  path: '/list/table-list',
-                  component: './list/table-list',
+                  path: '/task/list',
+                  component: './dashboard/analysis',
                 },
                 {
-                  name: 'basic-list',
+                  name: '任务详情',
                   icon: 'smile',
-                  path: '/list/basic-list',
-                  component: './list/basic-list',
+                  path: '/task/detail',
+                  authority: [],   // 这个权限回传入进去
+                  component: './dashboard/analysis',
                 },
                 {
-                  name: 'card-list',
-                  icon: 'smile',
-                  path: '/list/card-list',
-                  component: './list/card-list',
+                  component: '404',
                 },
               ],
             },
+
+            // 系统管理
             {
-              path: '/profile',
-              name: 'profile',
-              icon: 'profile',
+              path: '/system',
+              icon: 'table',
+              name: '系统设置',
+              Routes: ['src/pages/Authorized'],  // 注意这里的权限，这里的权限仅仅是用于展示，左边的菜单而已
+              authority: ['View', 'Edit', 'Super'], // 这个权限回传入进去
               routes: [
                 {
                   path: '/',
-                  redirect: '/profile/basic',
+                  redirect: '/system/role',
                 },
                 {
-                  name: 'basic',
+                  name: '成员管理',
                   icon: 'smile',
-                  path: '/profile/basic',
-                  component: './profile/basic',
+                  path: '/system/personnel',
+                  component: './dashboard/analysis',
                 },
                 {
-                  name: 'advanced',
+                  name: '角色管理',
                   icon: 'smile',
-                  path: '/profile/advanced',
-                  component: './profile/advanced',
-                },
-              ],
-            },
-            {
-              name: 'result',
-              icon: 'CheckCircleOutlined',
-              path: '/result',
-              routes: [
-                {
-                  path: '/',
-                  redirect: '/result/success',
+                  path: '/system/roles',
+                  component: './dashboard/analysis',
                 },
                 {
-                  name: 'success',
-                  icon: 'smile',
-                  path: '/result/success',
-                  component: './result/success',
-                },
-                {
-                  name: 'fail',
-                  icon: 'smile',
-                  path: '/result/fail',
-                  component: './result/fail',
-                },
-              ],
-            },
-            {
-              name: 'exception',
-              icon: 'warning',
-              path: '/exception',
-              routes: [
-                {
-                  path: '/',
-                  redirect: '/exception/403',
-                },
-                {
-                  name: '403',
-                  icon: 'smile',
-                  path: '/exception/403',
-                  component: './exception/403',
-                },
-                {
-                  name: '404',
-                  icon: 'smile',
-                  path: '/exception/404',
-                  component: './exception/404',
-                },
-                {
-                  name: '500',
-                  icon: 'smile',
-                  path: '/exception/500',
-                  component: './exception/500',
-                },
-              ],
-            },
-            {
-              name: 'account',
-              icon: 'user',
-              path: '/account',
-              routes: [
-                {
-                  path: '/',
-                  redirect: '/account/center',
-                },
-                {
-                  name: 'center',
-                  icon: 'smile',
-                  path: '/account/center',
-                  component: './account/center',
-                },
-                {
-                  name: 'settings',
-                  icon: 'smile',
-                  path: '/account/settings',
-                  component: './account/settings',
-                },
-              ],
-            },
-            {
-              name: 'editor',
-              icon: 'highlight',
-              path: '/editor',
-              routes: [
-                {
-                  path: '/',
-                  redirect: '/editor/flow',
-                },
-                {
-                  name: 'flow',
-                  icon: 'smile',
-                  path: '/editor/flow',
-                  component: './editor/flow',
-                },
-                {
-                  name: 'mind',
-                  icon: 'smile',
-                  path: '/editor/mind',
-                  component: './editor/mind',
-                },
-                {
-                  name: 'koni',
-                  icon: 'smile',
-                  path: '/editor/koni',
-                  component: './editor/koni',
+                  component: '404',
                 },
               ],
             },
@@ -320,16 +174,17 @@ export default defineConfig({
             },
           ],
         },
+        //  测试问题
       ],
     },
   ],
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
   theme: {
-    'primary-color': defaultSettings.primaryColor,
+    'primary-color': defaultSettings.primaryColor,  // 主题
   },
   title: false,
   ignoreMomentLocale: true,
-  proxy: proxy[REACT_APP_ENV || 'dev'],
+  proxy: proxy[REACT_APP_ENV || 'dev'],  // 网关代理
   manifest: {
     basePath: '/',
   },

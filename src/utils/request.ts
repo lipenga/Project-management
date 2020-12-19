@@ -4,6 +4,10 @@
  */
 import { extend } from 'umi-request';
 import { notification } from 'antd';
+import { getPageQuery, } from '@/utils/utils';
+import { history } from 'umi'
+import { stringify } from 'querystring'
+import { message } from 'antd';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -23,34 +27,78 @@ const codeMessage = {
   504: '网关超时。',
 };
 
-/**
- * 异常处理程序
- */
-const errorHandler = (error: { response: Response }): Response => {
-  const { response } = error;
-  if (response && response.status) {
-    const errorText = codeMessage[response.status] || response.statusText;
-    const { status, url } = response;
+const errorHandler = error => {
+  const {
+    response
+  } = error;
 
-    notification.error({
-      message: `请求错误 ${status}: ${url}`,
-      description: errorText,
-    });
+  if (response && response.status) {
+    if (response.status === 401) {
+      const {
+        redirect
+      } = getPageQuery(); // redirect
+      if (window.location.pathname !== '/user/login' && !redirect) {
+        history.replace({
+          pathname: '/user/login',
+          search: stringify({
+            redirect: window.location.href,
+          }),
+        });
+      }
+      localStorage.removeItem('antd-pro-token');
+    } else {
+      const errorText = codeMessage[response.status] || response.statusText;
+      const {
+        status,
+        url
+      } = response;
+      notification.error({
+        message: `请求错误 ${status}: ${url}`,
+        description: errorText,
+      });
+    }
+
   } else if (!response) {
     notification.error({
       description: '您的网络发生异常，无法连接服务器',
       message: '网络异常',
     });
+    return response;
   }
+
   return response;
 };
 
-/**
- * 配置request请求时的默认参数
- */
 const request = extend({
-  errorHandler, // 默认错误处理
+  errorHandler,
+  // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
+});
+
+// 请求拦截
+request.interceptors.request.use((url, options) => {
+  return {
+    url: url,
+    options: {
+      ...options,
+      interceptors: true,
+      headers: {
+        ...options.headers,
+        'token': JSON.parse(localStorage.getItem('antd-pro-token')),
+      }
+    },
+  };
+});
+
+// 响应拦截
+request.interceptors.response.use(async response => {
+  const data = await response.clone().json();
+  if (!data.success) {
+    if (response.status !== 401) {
+      data.message && message.error(data.message);
+    }
+  }
+  return response;
 });
 
 export default request;

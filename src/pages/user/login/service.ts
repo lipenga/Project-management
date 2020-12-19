@@ -1,19 +1,38 @@
-import request from 'umi-request';
+import http from 'umi-request'
 
-export interface LoginParamsType {
-  userName: string;
-  password: string;
-  mobile: string;
-  captcha: string;
-}
-
-export async function fakeAccountLogin(params: LoginParamsType) {
-  return request('/api/login/account', {
+// 登录
+const fakeAccountLogin = async (params: any) => {
+  return http('/api/auth/login', {
     method: 'POST',
     data: params,
   });
 }
 
-export async function getFakeCaptcha(mobile: string) {
-  return request(`/api/login/captcha?mobile=${mobile}`);
+
+// 获取验证码
+const getCode = async (params: any) => {
+  return http.get(`/api/loging/getVerify?email=${params}`)
+}
+
+// 校验验证码
+const validateCode = async (params: any) => {
+  return http.post(`/api/loging/getVerify`, { data: params })
+}
+
+// 注册
+const registing = async (params: any) => {
+  return http.post(`/api/loging/register?code=${params.captcha}`, { data: params })
+}
+
+
+// 待清理
+const getFakeCaptcha = async (mobile: string) => {
+  return http(`/api/login/captcha?mobile=${mobile}`);
+}
+
+
+export {
+  fakeAccountLogin, getCode, validateCode, registing,
+  getFakeCaptcha,
+
 }

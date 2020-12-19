@@ -8,29 +8,35 @@ import ProLayout, {
   BasicLayoutProps as ProLayoutProps,
   Settings,
   DefaultFooter,
-  SettingDrawer,
 } from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Link, useIntl, connect, Dispatch, history } from 'umi';
+import { Link, useIntl, connect, Dispatch, history, } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
+
+// 2020/12/18日演奏至此 接下里的是深入的dva
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
-import { getMatchMenu } from '@umijs/route-utils';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
+import { getMatchMenu } from '@umijs/route-utils'
+import { rgb2arr } from '@antv/l7';
+
+
 const noMatch = (
   <Result
     status={403}
     title="403"
-    subTitle="Sorry, you are not authorized to access this page."
+    subTitle="您还未登录哦，先去登录吧！"
     extra={
       <Button type="primary">
-        <Link to="/user/login">Go Login</Link>
+        <Link to="/user/login">前往登录</Link>
       </Button>
     }
   />
 );
+
+
 export interface BasicLayoutProps extends ProLayoutProps {
   breadcrumbNameMap: {
     [path: string]: MenuDataItem;
@@ -41,15 +47,17 @@ export interface BasicLayoutProps extends ProLayoutProps {
   settings: Settings;
   dispatch: Dispatch;
 }
+
 export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
   breadcrumbNameMap: {
     [path: string]: MenuDataItem;
   };
 };
+
 /**
  * use Authorized check all menu item
  */
-
+// 检查权限  这个是重点！控制着左边菜单列表
 const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
   menuList.map((item) => {
     const localItem = {
@@ -59,41 +67,50 @@ const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
     return Authorized.check(item.authority, localItem, null) as MenuDataItem;
   });
 
+
 const defaultFooterDom = (
-  <DefaultFooter
-    copyright={`${new Date().getFullYear()} 蚂蚁集团体验技术部出品`}
-    links={[
-      {
-        key: 'Ant Design Pro',
-        title: 'Ant Design Pro',
-        href: 'https://pro.ant.design',
-        blankTarget: true,
-      },
-      {
-        key: 'github',
-        title: <GithubOutlined />,
-        href: 'https://github.com/ant-design/ant-design-pro',
-        blankTarget: true,
-      },
-      {
-        key: 'Ant Design',
-        title: 'Ant Design',
-        href: 'https://ant.design',
-        blankTarget: true,
-      },
-    ]}
-  />
+  <>
+    <DefaultFooter
+      copyright={`${new Date().getFullYear()} 蚂蚁集团体验技术部出品`}
+      links={[
+        {
+          key: 'Ant Design Pro',
+          title: 'Ant Design Pro',
+          href: 'https://pro.ant.design',
+          blankTarget: true,
+        },
+        {
+          key: 'github',
+          title: <GithubOutlined />,
+          href: 'https://github.com/ant-design/ant-design-pro',
+          blankTarget: true,
+        },
+        {
+          key: 'Ant Design',
+          title: 'Ant Design',
+          href: 'https://ant.design',
+          blankTarget: true,
+        },
+      ]}
+    />
+  </>
 );
 
+
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
+
+  useEffect(() => {
+    window.reloadAuthorized()
+  }, [])
   const {
     dispatch,
     children,
-    settings,
-    location = {
+    settings,  // layout的设置
+    location = {  // 当前应用的位置
       pathname: '/',
     },
   } = props;
+
   const menuDataRef = useRef<MenuDataItem[]>([]);
   useEffect(() => {
     if (dispatch) {
@@ -102,11 +119,11 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       });
     }
   }, []);
+
   /**
    * init variables
    */
-
-  const handleMenuCollapse = (payload: boolean): void => {
+  const handleMenuCollapse = (payload: boolean): void => {  // 当菜单折叠的时候 去获取权限 基本上没什么调用屌用
     if (dispatch) {
       dispatch({
         type: 'global/changeLayoutCollapsed',
@@ -115,6 +132,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     }
   }; // get children authority
 
+  // 只要你的路径发生了变化就去验证你的权限 
   const authorized = useMemo(
     () =>
       getMatchMenu(location.pathname || '/', menuDataRef.current).pop() || {
@@ -122,24 +140,33 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       },
     [location.pathname],
   );
+
+  /**
+   *  详细见proLLyout react-intl 的 formatMessage 方法 (data: { id: any; defaultMessage?: string }) => string;  说白了中文化
+   */
   const { formatMessage } = useIntl();
+
   return (
     <>
       <ProLayout
         logo={logo}
-        formatMessage={formatMessage}
+        // formatMessage={formatMessage}
+
         {...props}
         {...settings}
         onCollapse={handleMenuCollapse}
+
         onMenuHeaderClick={() => history.push('/')}
-        menuItemRender={(menuItemProps, defaultDom) => {
+
+        menuItemRender={(menuItemProps, defaultDom) => {  // 子菜单的渲染方式辅助用
+          // 查看是否跳转路由 代码的健壮性 
           if (menuItemProps.isUrl || !menuItemProps.path) {
             return defaultDom;
           }
-
           return <Link to={menuItemProps.path}>{defaultDom}</Link>;
         }}
-        breadcrumbRender={(routers = []) => [
+
+        breadcrumbRender={(routers = []) => [  // 面包屑
           {
             path: '/',
             breadcrumbName: formatMessage({
@@ -148,27 +175,39 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           },
           ...routers,
         ]}
-        itemRender={(route, params, routes, paths) => {
+
+        itemRender={(route, params, routes, paths) => {  // 面包屑的渲染函数
           const first = routes.indexOf(route) === 0;
           return first ? (
             <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
           ) : (
-            <span>{route.breadcrumbName}</span>
-          );
+              <span>{route.breadcrumbName}</span>
+            );
         }}
+
+        // 底部 版权渲染器
         footerRender={() => defaultFooterDom}
-        menuDataRender={menuDataRender}
-        rightContentRender={() => <RightContent />}
+        menuDataRender={(a, b, c) => {
+          // window.localStorage.setItem('routerConfig', JSON.stringify(menuDataRender(a, b, c)))
+
+          return menuDataRender(a, b, c)
+        }}
+
+        rightContentRender={() => <RightContent />}  // 个人中心操控制器
+
         postMenuData={(menuData) => {
+          // 在显示内容页前对菜单数据进行查看，修改不会触发重新渲染，menuData菜单数据
           menuDataRef.current = menuData || [];
           return menuData || [];
         }}
       >
+        {/* 页面基的权限控制器 */}
         <Authorized authority={authorized!.authority} noMatch={noMatch}>
           {children}
         </Authorized>
       </ProLayout>
-      <SettingDrawer
+
+      {/* <SettingDrawer // 主题和样式设置器
         settings={settings}
         onSettingChange={(config) =>
           dispatch({
@@ -176,7 +215,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
             payload: config,
           })
         }
-      />
+      /> */}
     </>
   );
 };
@@ -185,3 +224,5 @@ export default connect(({ global, settings }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
 }))(BasicLayout);
+
+
