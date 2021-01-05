@@ -1,7 +1,7 @@
 // Analyasis
 // @ts-nocheck
 import React, { useState, useRef, useEffect, useContext } from 'react'
-import { test } from './service'
+// import { test } from './service'
 import { Table, Input, Button, Popconfirm, Form } from 'antd';
 /** 
  * Preset 
@@ -226,7 +226,6 @@ const Analyasis: React.FC<{}> = () => {
   return (
     <>
       <EditableTable />
-
     </>
   )
 }
