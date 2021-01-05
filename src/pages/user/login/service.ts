@@ -1,3 +1,4 @@
+// 不需要权限
 import http from 'umi-request'
 
 // 登录
@@ -34,5 +35,4 @@ const getFakeCaptcha = async (mobile: string) => {
 export {
   fakeAccountLogin, getCode, validateCode, registing,
   getFakeCaptcha,
-
 }

@@ -83,26 +83,26 @@ export default defineConfig({
                   name: '项目列表',
                   icon: 'smile',
                   path: '/project/list',
-                  component: './dashboard/analysis',
+                  component: './Project',
                 },
                 {
                   name: '项目成员管理',
                   icon: 'smile',
                   path: '/project/pro_roles',
-                  component: './dashboard/analysis',
+                  component: './Project/Roles',
                 },
                 {
                   name: '项目类型管理',
                   icon: 'smile',
                   path: '/project/pro_category',
-                  component: './dashboard/analysis',
+                  component: './Project/Category',
                 },
                 {
                   name: '项目详情',
                   icon: 'smile',
                   path: '/project/detail',
                   authority: [],
-                  component: './dashboard/analysis',
+                  component: './Project/Detail',
                 },
                 {
                   component: '404',
@@ -126,14 +126,14 @@ export default defineConfig({
                   name: '任务列表',
                   icon: 'smile',
                   path: '/task/list',
-                  component: './dashboard/analysis',
+                  component: './Task',
                 },
                 {
                   name: '任务详情',
                   icon: 'smile',
                   path: '/task/detail',
                   authority: [],   // 这个权限回传入进去
-                  component: './dashboard/analysis',
+                  component: './Task/Detail',
                 },
                 {
                   component: '404',
@@ -151,19 +151,19 @@ export default defineConfig({
               routes: [
                 {
                   path: '/',
-                  redirect: '/system/role',
+                  redirect: '/system',
                 },
                 {
                   name: '成员管理',
                   icon: 'smile',
                   path: '/system/personnel',
-                  component: './dashboard/analysis',
+                  component: './System',
                 },
                 {
                   name: '角色管理',
                   icon: 'smile',
                   path: '/system/roles',
-                  component: './dashboard/analysis',
+                  component: './System/Roles',
                 },
                 {
                   component: '404',

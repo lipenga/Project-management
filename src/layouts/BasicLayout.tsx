@@ -14,7 +14,7 @@ import { Link, useIntl, connect, Dispatch, history, } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
 
-// 2020/12/18日演奏至此 接下里的是深入的dva
+
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
@@ -149,8 +149,6 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     <>
       <ProLayout
         logo={logo}
-        // formatMessage={formatMessage}
-
         {...props}
         {...settings}
         onCollapse={handleMenuCollapse}

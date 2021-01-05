@@ -8,9 +8,10 @@
 export default {
   dev: {
     '/api/': {
-      target: 'http://112.124.109.250:3045',
+      // target: 'http://112.124.109.250:3045',
+      target: 'http://localhost:3045',
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      pathRewrite: { '^/api': '/api' },
     },
   },
   test: {
@@ -22,9 +23,9 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'http://112.124.109.250:3555',
+      target: 'http://112.124.109.250:3045',
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      pathRewrite: { '^': '' },
     },
   },
 };
