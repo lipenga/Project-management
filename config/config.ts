@@ -83,7 +83,7 @@ export default defineConfig({
                   name: '项目列表',
                   icon: 'smile',
                   path: '/project/list',
-                  component: './dashboard/analysis',
+                  component: './dashboard/workplace',
                 },
                 {
                   name: '项目成员管理',
@@ -95,14 +95,14 @@ export default defineConfig({
                   name: '项目类型管理',
                   icon: 'smile',
                   path: '/project/pro_category',
-                  component: './dashboard/analysis',
+                  component: './dashboard/monitor',
                 },
                 {
                   name: '项目详情',
                   icon: 'smile',
                   path: '/project/detail',
                   authority: [],
-                  component: './dashboard/analysis',
+                  component: './dashboard/workplace',
                 },
                 {
                   component: '404',
