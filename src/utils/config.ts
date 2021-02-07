@@ -4,7 +4,7 @@ export default {
   paginationDisplay: {
     showSizeChanger: true,
     showQuickJumper: true,
-    showTotal: (total) => `共 ${total} 条`,
+    showTotal: (total: number) => `共 ${total} 条`,
     pageSize: 5,
     current: 1,
     pageSizeOptions: [5, 10, 20, 50, 100],
@@ -56,7 +56,6 @@ export default {
   isDns: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$/,
   //网关验证
   isGateway: /^192\.168(\.(\d|([1-9]\d)|(1\d{2})|(2[0-4]\d)|(25[0-5]))){2}$/,
-  phone: /^1[123456789]\d{9}$/, //手机号码
   editColor: '#87d068',
   deleteColor: '#f50',
   otherColor: '#108ee9',

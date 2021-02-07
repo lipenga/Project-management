@@ -101,9 +101,9 @@ request.interceptors.request.use((url, options) => {
 request.interceptors.response.use(async response => {
   const data = await response.clone().json();
   if (!data.success) {
-    if (response.status !== 401) {
-      data.message && message.error(data.message);
-    }
+    // if (response.status !== 401) {
+    // data.message && message.error(data.message);
+    // }
   }
   return response;
 });

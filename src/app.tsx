@@ -1,4 +1,4 @@
-// 微前端的集成化 预留控制端
+// 微前端的集成化 ，乾坤配置
 
 // import React from 'react';
 // import { BasicLayoutProps, Settings as LayoutSettings } from '@ant-design/pro-layout';
