@@ -1,3 +1,4 @@
+// 前端微服务有关，乾坤配置
 import { Button, message, notification } from 'antd';
 
 import React from 'react';
@@ -57,7 +58,7 @@ if (pwa) {
       description: useIntl().formatMessage({ id: 'app.pwa.serviceworker.updated.hint' }),
       btn,
       key,
-      onClose: async () => {},
+      onClose: async () => { },
     });
   });
 } else if ('serviceWorker' in navigator && isHttps) {
