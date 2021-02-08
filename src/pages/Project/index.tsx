@@ -7,12 +7,34 @@ import ProTable, { ProColumns } from '@ant-design/pro-table'
 import { getLable } from './service'
 import config from '@/utils/config'
 import { SizeType } from 'antd/lib/config-provider/SizeContext'
-import { ProjectTableListItem } from './types'
-
-
+import { typeProjectTableListItem } from './types'
+import { PlusOutlined } from '@ant-design/icons'
+import AddProject from './AddProject'
 /** 
  * Preset 
  */
+const Tablist = [
+  {
+    tab: '进行中（2）',
+    key: '1',
+  },
+  {
+    tab: '我创建的（0）',
+    key: '2',
+  },
+  {
+    tab: '已延期（24）',
+    key: '3',
+  },
+  {
+    tab: '未开始（15）',
+    key: '4',
+  },
+  {
+    tab: '全部（15）',
+    key: '5',
+  },
+]
 const { Search } = Input
 
 const Project: React.FC<{}> = () => {
@@ -24,8 +46,10 @@ const Project: React.FC<{}> = () => {
   const [sorter, setSorter] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
 
-  const [visibleS, setVisibleS] = useState<boolean>(false);
-  const [obj, setObj] = useState<boolean>(false);
+  const [mProjectProps, setMProjectProps] = useState<any>({
+    visible: false,
+    objectModal: {}
+  });
 
 
   /** 
@@ -56,6 +80,8 @@ const Project: React.FC<{}> = () => {
   /** 
    * componentsConfig 
    */
+
+  // 顶部提示
   const content = (
     <Descriptions size="small" column={2}>
       <Descriptions.Item span={2} label="介绍">欢迎使用NID项目管理平台，开始创建一个项目吧！</Descriptions.Item>
@@ -63,16 +89,56 @@ const Project: React.FC<{}> = () => {
   );
 
   // 表格列
-  const columns: ProColumns<ProjectTableListItem>[] = [
+  const columns: ProColumns<typeProjectTableListItem>[] = [
     {
-      title: '标识描述',
-      dataIndex: 'description',
+      title: '名称',
+      dataIndex: 'name',
       ellipsis: true,
       width: 200,
     },
     {
-      title: '级别',
-      dataIndex: 'grade',
+      title: '进度',
+      dataIndex: 'schedule',
+      hideInSearch: true,
+    },
+    {
+      title: '编号',
+      dataIndex: 'numbering',
+      width: 200,
+      hideInSearch: true,
+    },
+    {
+      title: '项目类型',
+      dataIndex: 'projectCategoryName',
+      hideInSearch: true,
+    },
+    {
+      title: '计划开始时间',
+      dataIndex: 'planStartTime',
+      width: 200,
+      hideInSearch: true,
+    },
+    {
+      title: '计划结束时间',
+      dataIndex: 'planEndTime',
+      width: 200,
+      hideInSearch: true,
+    },
+    {
+      title: '项目经理',
+      dataIndex: 'projectManagerName',
+      width: 200,
+      hideInSearch: true,
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      width: 200,
+      hideInSearch: true,
+    },
+    {
+      title: '状态',
+      dataIndex: 'projectState',
       width: 200,
       hideInSearch: true,
     },
@@ -80,10 +146,16 @@ const Project: React.FC<{}> = () => {
       title: '操作',
       dataIndex: 'id',
       fixed: 'right',
-      width: 150,
+      width: 300,
       valueType: 'option',
       render: (_, record) => [
+        <a href="#" key="edit">编辑</a>,
+        <a href="#" key="ok">完成</a>,
+        <a href="#" key="stop">终止</a>,
+        <a href="#" key="ed">暂停</a>,
+        <a href="#" key="res">延期</a>,
         <Popconfirm
+          key="delete"
           title="您确定要删除该标注？"
           onConfirm={() => { }}
           onCancel={() => { }}
@@ -96,7 +168,32 @@ const Project: React.FC<{}> = () => {
     },
   ];
 
+  // 新增项目按钮
+  const NewProject: React.FC<any> = () => {
+    return (<>
+      <Button onClick={() => { setMProjectProps({ visible: true, objectModal: {} }) }} type="primary" size={size}>
+        <PlusOutlined />
+    新增
+  </Button>
+    </>
+    )
+  }
 
+  // modal对话框属性
+  const addProjectProps = {
+    ...mProjectProps,
+    loading: false,
+    onCancel: () => {
+      setMProjectProps({
+        visible: false,
+        objectModal: {}
+      })
+    },
+    onSubmit: (values: typeProjectCategory) => {
+      // useCreateCategory(values)
+      console.log('values', values);
+    },
+  }
   /** 
    * render
    */
@@ -105,28 +202,7 @@ const Project: React.FC<{}> = () => {
       <PageContainer
         fixedHeader
         content={content}
-        tabList={[
-          {
-            tab: '进行中（2）',
-            key: '1',
-          },
-          {
-            tab: '我创建的（0）',
-            key: '2',
-          },
-          {
-            tab: '已延期（24）',
-            key: '3',
-          },
-          {
-            tab: '未开始（15）',
-            key: '4',
-          },
-          {
-            tab: '全部（15）',
-            key: '5',
-          },
-        ]}
+        tabList={Tablist}
         extraContent={
           <Space size={24}>
             <Avatar
@@ -138,22 +214,24 @@ const Project: React.FC<{}> = () => {
       >
         <Card>
           <ProTable
+            headerTitle={<NewProject />}
             columns={columns}
             actionRef={actionRef}
             request={(params) => loadData(params)}
             params={{ sorter, sortOrder }}
             size={size}
-            rowKey="id"
+            rowKey="_id"
             search={false}
             onSizeChange={(size: SizeType) => setSize(size)}
             onChange={(p, f, s) => onTableChange(p, f, s)}
             pagination={config.paginationDisplay}
-            scroll={{ y: 450 }}
+            scroll={{ y: 450, x: 1920 }}
             toolBarRender={() => [
-              <Search placeholder="按名称查询" />
+              <Search key="search" placeholder="按名称查询" />
             ]}
           />
         </Card>
+        <AddProject {...addProjectProps} />
       </PageContainer>
       <Button type='primary' onClick={() => {
         history.push({

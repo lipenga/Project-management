@@ -46,8 +46,8 @@ const ProjectDetail: React.FC<any> = (Props) => {
   const { run: useDeleteLable, } = useRequest(deleteLable, {
     manual: true,
     onSuccess: (res) => {
-      if (res.success) {
-        message.success('删除成功')
+      if (res.sucess) {
+        message.success('删除成功！')
         actionRef.current?.reload()
       }
     }
@@ -66,6 +66,7 @@ const ProjectDetail: React.FC<any> = (Props) => {
 
   const confirm = (value) => {
     useDeleteLable(value._id)
+
   }
 
   const cancel = (e) => {
