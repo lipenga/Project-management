@@ -1,26 +1,26 @@
 // System
-import config from '@/utils/config'
-import { PlusOutlined } from '@ant-design/icons'
-import { PageContainer } from '@ant-design/pro-layout'
-import ProTable from '@ant-design/pro-table'
-import { useRequest } from 'ahooks'
-import { message } from 'antd'
-import { Button, Card, Popconfirm } from 'antd'
-import { Avatar, Space, Input } from 'antd'
-import { SizeType } from 'antd/es/config-provider/SizeContext'
-import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
-import { registing } from '../user/login/service'
-import AddSysUser from './AddSysUser'
-import { getUseAll, } from './service'
+import config from '@/utils/config';
+import { PlusOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-layout';
+import ProTable from '@ant-design/pro-table';
+import { useRequest } from 'ahooks';
+import { message } from 'antd';
+import { Button, Card, Popconfirm } from 'antd';
+import { Avatar, Space, Input } from 'antd';
+import { SizeType } from 'antd/es/config-provider/SizeContext';
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import { registing } from '../user/login/service';
+import AddSysUser from './AddSysUser';
+import { deleteUser, editUser, getUseAll } from './service';
 
-/** 
- * Preset 
+/**
+ * Preset
  */
-const { Search } = Input
+const { Search } = Input;
 
 const System: React.FC<{}> = () => {
-  /** 
-   * state 
+  /**
+   * state
    */
   const actionRef = useRef();
   const [size, setSize] = useState<SizeType>('middle');
@@ -28,10 +28,10 @@ const System: React.FC<{}> = () => {
   const [sortOrder, setSortOrder] = useState<string>('');
   const [useProps, setUserProps] = useState<any>({
     visible: false,
-    objectModal: {}
+    objectModal: {},
   });
 
-  /** 
+  /**
    * method
    */
   const onTableChange = (p, f, s) => {
@@ -51,34 +51,61 @@ const System: React.FC<{}> = () => {
   const { run: useRegisting, loading: ResLoading } = useRequest(registing, {
     manual: true,
     onSuccess: (res) => {
-      message.success('注册成功')
-      actionRef.current.reload()
+      message.success('注册成功');
+      actionRef.current.reload();
       setUserProps({
         visible: false,
-        objectModal: {}
-      })
-    }
-  })
+        objectModal: {},
+      });
+    },
+  });
 
-  /** 
-   * effct 
+  // 删除人员
+  const { run: useDelete, loading: Dloading } = useRequest(deleteUser, {
+    manual: true,
+    onSuccess: () => {
+      message.success('删除成功');
+      actionRef.current.reload();
+    },
+  });
+
+  // 编辑人员
+  const { run: useEditGuser, loading: ELoading } = useRequest(editUser, {
+    manual: true,
+    onSuccess: () => {
+      message.success('删除成功');
+      setUserProps({
+        visible: false,
+        objectModal: {},
+      });
+      actionRef.current.reload();
+    },
+  });
+
+  /**
+   * effct
    */
 
-
-  /** 
-   * componentsConfig 
+  /**
+   * componentsConfig
    */
   // 新增成员按钮
   const NewProject: React.FC<any> = () => {
-    return (<>
-      <Button onClick={() => {
-        setUserProps({ visible: true, objectModal: {} })
-      }}
-        type="primary"
-        size={size}><PlusOutlined />新增</Button>
-    </>
-    )
-  }
+    return (
+      <>
+        <Button
+          onClick={() => {
+            setUserProps({ visible: true, objectModal: {} });
+          }}
+          type="primary"
+          size={size}
+        >
+          <PlusOutlined />
+          新增
+        </Button>
+      </>
+    );
+  };
 
   const columns = [
     {
@@ -131,14 +158,24 @@ const System: React.FC<{}> = () => {
       title: '操作',
       dataIndex: 'id',
       fixed: 'right',
-      width: 300,
+      width: 150,
       valueType: 'option',
       render: (_, record) => [
-        <a href="#" key="edit">编辑</a>,
+        <a
+          href="#"
+          key="edit"
+          onClick={() => {
+            setUserProps({ visible: true, objectModal: record });
+          }}
+        >
+          编辑
+        </a>,
         <Popconfirm
           key="delete"
-          title="您确定要删除该标注？"
-          onConfirm={() => { }}
+          title="您确定要删除该人员吗？"
+          onConfirm={() => {
+            useDelete([record._id]);
+          }}
           onCancel={() => { }}
           okText="确定"
           cancelText="取消"
@@ -147,7 +184,7 @@ const System: React.FC<{}> = () => {
         </Popconfirm>,
       ],
     },
-  ]
+  ];
 
   // modal对话框属性
   const addProjectProps = {
@@ -156,15 +193,19 @@ const System: React.FC<{}> = () => {
     onCancel: () => {
       setUserProps({
         visible: false,
-        objectModal: {}
-      })
+        objectModal: {},
+      });
     },
     onSubmit: (values: any) => {
-      useRegisting(values)
+      if (values._id) {
+        useEditGuser(values);
+      } else {
+        useRegisting(values);
+      }
     },
-  }
+  };
 
-  /** 
+  /**
    * render
    */
   return (
@@ -177,7 +218,8 @@ const System: React.FC<{}> = () => {
             shape="square"
             size="large"
             style={{ width: 110, height: 110, marginRight: 75 }}
-            src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />
+            src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+          />
         </Space>
       }
     >
@@ -195,14 +237,12 @@ const System: React.FC<{}> = () => {
           onChange={(p, f, s) => onTableChange(p, f, s)}
           pagination={config.paginationDisplay}
           scroll={{ y: 450, x: 1920 }}
-          toolBarRender={() => [
-            <Search key="search" placeholder="按名" />
-          ]}
+          toolBarRender={() => [<Search key="search" placeholder="按名" />]}
         />
         <AddSysUser {...addProjectProps} />
       </Card>
     </PageContainer>
-  )
-}
+  );
+};
 
-export default System
+export default System;

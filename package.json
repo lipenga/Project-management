@@ -56,6 +56,7 @@
     "@antv/l7-react": "^2.1.9",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.isequal": "^4.5.5",
+    "@types/react-split-pane": "^0.1.67",
     "@umijs/route-utils": "^1.0.33",
     "ahooks": "^2.9.2",
     "antd": "^4.8.0",
@@ -80,6 +81,7 @@
     "react-fittext": "^1.0.0",
     "react-helmet-async": "^1.0.4",
     "react-router": "^4.3.1",
+    "react-split-pane": "^0.1.92",
     "umi": "^3.2.14",
     "umi-request": "^1.0.8",
     "use-merge-value": "^1.0.1"

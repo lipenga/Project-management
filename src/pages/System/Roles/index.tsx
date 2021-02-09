@@ -1,30 +1,38 @@
-import config from "@/utils/config";
-import { CoffeeOutlined, PlusOutlined } from "@ant-design/icons";
-import { PageContainer } from "@ant-design/pro-layout";
-import ProTable, { ActionType, ProColumns } from "@ant-design/pro-table";
-import { Tag } from "antd";
-import { Button, Avatar, Card, message, Popconfirm, Space } from "antd";
-import { SizeType } from "antd/lib/config-provider/SizeContext";
-import route from "mock/route";
-import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
-import { useRequest } from "umi";
-import { createProjectCategory, createRole, deleteProjectCategory, deleteRole, editeProjectCategory, editRole, getProjectCategoryList, queryRolePage } from "../service";
-import { typeProjectCategory } from "../types";
-import AddCategory from "./AddCategory";
+import config from '@/utils/config';
+import { CoffeeOutlined, PlusOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-layout';
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { Tag } from 'antd';
+import { Button, Avatar, Card, message, Popconfirm, Space } from 'antd';
+import { SizeType } from 'antd/lib/config-provider/SizeContext';
+import route from 'mock/route';
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import { useRequest } from 'umi';
+import {
+  createProjectCategory,
+  createRole,
+  deleteProjectCategory,
+  deleteRole,
+  editeProjectCategory,
+  editRole,
+  getProjectCategoryList,
+  queryRolePage,
+} from '../service';
+import { typeProjectCategory } from '../types';
+import AddCategory from './AddCategory';
 
-
-/** 
- * Preset 
+/**
+ * Preset
  */
 let EmuRole = [
   { name: '查看', key: 'View' },
   { name: '编辑', key: 'Edit' },
   { name: '超级管理员', key: 'Super' },
-]
+];
 
 const ProjectCategory: React.FC<{}> = () => {
-  /** 
-   * state 
+  /**
+   * state
    */
   const actionRef = useRef<ActionType>();
   const [size, setSize] = useState<SizeType>('middle');
@@ -34,13 +42,13 @@ const ProjectCategory: React.FC<{}> = () => {
   const [obj, setObj] = useState<boolean>(false);
   const [selectedRowKeys, setSelectRowKeys] = useState([]);
 
-  /** 
+  /**
    * method
    */
   const onTableChange = (p, f, s) => {
     setSorter(s.field || '');
     setSortOrder(s.order || '');
-    setSelectRowKeys([])
+    setSelectRowKeys([]);
   };
 
   const loadData = async (params) => {
@@ -52,47 +60,45 @@ const ProjectCategory: React.FC<{}> = () => {
   };
 
   //  删除角色
-  const { run: useDeleteCategory, } = useRequest(deleteRole, {
+  const { run: useDeleteCategory } = useRequest(deleteRole, {
     manual: true,
     onSuccess: (res) => {
-      setSelectRowKeys([])
-      message.success('删除成功！')
-      actionRef.current?.reload()
-    }
-  })
+      setSelectRowKeys([]);
+      message.success('删除成功！');
+      actionRef.current?.reload();
+    },
+  });
 
   //  编辑角色
-  const { run: useEditCategory, } = useRequest(editRole, {
+  const { run: useEditCategory } = useRequest(editRole, {
     manual: true,
     onSuccess: (res) => {
       setVisibleS(false);
-      message.success('编辑成功！')
-      actionRef.current?.reload()
-    }
-  })
+      message.success('编辑成功！');
+      actionRef.current?.reload();
+    },
+  });
 
   //  创建角色
-  const { run: useCreateCategory, } = useRequest(createRole, {
+  const { run: useCreateCategory } = useRequest(createRole, {
     manual: true,
     onSuccess: (res) => {
       setVisibleS(false);
-      actionRef.current?.reload()
-    }
-  })
+      actionRef.current?.reload();
+    },
+  });
 
   const confirm = (value) => {
-    useDeleteCategory([value._id])
-  }
+    useDeleteCategory([value._id]);
+  };
 
-  const cancel = (e) => {
-  }
-  /** 
-   * effct 
+  const cancel = (e) => { };
+  /**
+   * effct
    */
 
-
-  /** 
-   * componentsConfig 
+  /**
+   * componentsConfig
    */
   const columns: ProColumns<any>[] = [
     {
@@ -113,20 +119,15 @@ const ProjectCategory: React.FC<{}> = () => {
       width: 200,
       hideInSearch: true,
       render: (_, recode) => {
-        let array = recode?.rules.split(',')
-        let nameSring = []
-        array.forEach(element => {
-          let nameFind = EmuRole.find((v) => v.key == element)
-          nameSring.push(nameFind.name)
-        }
+        return (
+          <>
+            {' '}
+            {_?.map((v) => {
+              return <Tag>{v}</Tag>;
+            })}{' '}
+          </>
         );
-        return <> {
-          nameSring.map((v) => {
-            return <Tag>{v}</Tag>
-          })
-        } </>
-
-      }
+      },
     },
     {
       title: '操作',
@@ -135,13 +136,20 @@ const ProjectCategory: React.FC<{}> = () => {
       width: 150,
       valueType: 'option',
       render: (_, record) => [
-        <a href="#" onClick={() => {
-          setVisibleS(true)
-          setObj(record)
-        }}>编辑 </a>,
+        <a
+          href="#"
+          onClick={() => {
+            setVisibleS(true);
+            setObj(record);
+          }}
+        >
+          编辑{' '}
+        </a>,
         <Popconfirm
           title="您确定要删除该角色？"
-          onConfirm={() => { confirm(record) }}
+          onConfirm={() => {
+            confirm(record);
+          }}
           onCancel={cancel}
           okText="确定"
           cancelText="取消"
@@ -151,7 +159,6 @@ const ProjectCategory: React.FC<{}> = () => {
       ],
     },
   ];
-
 
   const props = {
     visibleS,
@@ -163,14 +170,14 @@ const ProjectCategory: React.FC<{}> = () => {
     },
     onSubmit: (values: any) => {
       if (values._id) {
-        useEditCategory(values)
+        useEditCategory(values);
       } else {
-        useCreateCategory(values)
+        useCreateCategory(values);
       }
     },
   };
 
-  /** 
+  /**
    * render
    */
   return (
@@ -183,7 +190,9 @@ const ProjectCategory: React.FC<{}> = () => {
             <Avatar
               shape="square"
               size="large"
-              style={{ width: 110, height: 110, marginRight: 75 }} src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />
+              style={{ width: 110, height: 110, marginRight: 75 }}
+              src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+            />
           </Space>
         }
       >
@@ -191,16 +200,23 @@ const ProjectCategory: React.FC<{}> = () => {
           <ProTable
             headerTitle={
               <>
-                <Button onClick={() => { setVisibleS(true) }} type="primary" size={size}>
+                <Button
+                  onClick={() => {
+                    setVisibleS(true);
+                  }}
+                  type="primary"
+                  size={size}
+                >
                   <PlusOutlined />
-              新增
-            </Button>
+                  新增
+                </Button>
               </>
             }
             rowSelection={{
-              selectedRowKeys, onChange: (selectedRowKeys) => {
-                setSelectRowKeys(selectedRowKeys)
-              }
+              selectedRowKeys,
+              onChange: (selectedRowKeys) => {
+                setSelectRowKeys(selectedRowKeys);
+              },
             }}
             tableAlertOptionRender={(selectedRowKeys, onCleanSelected) => {
               return (
@@ -208,8 +224,8 @@ const ProjectCategory: React.FC<{}> = () => {
                   <Popconfirm
                     title="是否批量删除"
                     onConfirm={() => {
-                      useDeleteCategory(selectedRowKeys.selectedRowKeys)
-                      actionRef.current.reload()
+                      useDeleteCategory(selectedRowKeys.selectedRowKeys);
+                      actionRef.current.reload();
                     }}
                     okText="确认"
                     cancelText="取消"
@@ -223,11 +239,12 @@ const ProjectCategory: React.FC<{}> = () => {
               <Space size={24}>
                 <span>
                   已选 {selectedRowKeys.length} 项
-                        <a style={{ marginLeft: 8 }} onClick={onCleanSelected}>取消选择</a>
+                  <a style={{ marginLeft: 8 }} onClick={onCleanSelected}>
+                    取消选择
+                  </a>
                 </span>
               </Space>
             )}
-
             columns={columns}
             actionRef={actionRef}
             request={(params) => loadData(params)}
@@ -244,7 +261,7 @@ const ProjectCategory: React.FC<{}> = () => {
         </Card>
       </PageContainer>
     </>
-  )
-}
+  );
+};
 
-export default ProjectCategory
+export default ProjectCategory;
