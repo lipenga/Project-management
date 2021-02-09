@@ -1,0 +1,51 @@
+@import '~@/utils/utils.less';
+
+.treeBorder {
+  h2 {
+    height: 44px;
+    line-height: 44px;
+    background: #fafafa;
+    font-size: 16px;
+    color: #000;
+    padding-left: 20px;
+    margin: 0 -10px;
+  }
+
+  .fn-treeHeight();
+  overflow-y: auto;
+  overflow-x: auto;
+  background-color: #fff;
+  padding: 0 10px;
+  .ui-scrollbar();
+
+  :global {
+    .ant-tree {
+      .ant-tree-switcher {
+        float: left;
+      }
+
+      .ant-tree-node-content-wrapper {
+        display: block;
+        .textOverflow();
+
+        .ant-tree-iconEle {
+          background-repeat: no-repeat;
+        }
+      }
+    }
+  }
+}
+
+.deptDetail {
+  .fn-treeHeight();
+  padding: 0 16px 16px 16px;
+  // overflow-y: auto;
+  // overflow-x: auto;
+  background-color: #fff;
+}
+
+:global {
+  .ant-tree .ant-tree-node-content-wrapper:hover {
+    background-color: #e6f7ff;
+  }
+}

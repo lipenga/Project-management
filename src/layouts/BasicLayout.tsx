@@ -163,15 +163,15 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           return <Link to={menuItemProps.path}>{defaultDom}</Link>;
         }}
 
-        breadcrumbRender={(routers = []) => [  // 面包屑
-          {
-            path: '/',
-            breadcrumbName: formatMessage({
-              id: 'menu.home',
-            }),
-          },
-          ...routers,
-        ]}
+        // breadcrumbRender={(routers = []) => [  // 面包屑
+        //   {
+        //     path: '/',
+        //     breadcrumbName: formatMessage({
+        //       id: 'menu.home',
+        //     }),
+        //   },
+        //   ...routers,
+        // ]}
 
         itemRender={(route, params, routes, paths) => {  // 面包屑的渲染函数
           const first = routes.indexOf(route) === 0;
