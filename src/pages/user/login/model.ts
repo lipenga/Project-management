@@ -11,19 +11,15 @@ export function setAuthority(value: any) {
 
   // 登录之后设置权限
   const { access_token, user } = value
-  const { rule } = user
-  let authority = rule?.rules?.split(',') || []
+  const { rule = [] } = user
+  let authority = rule?.rules
 
   localStorage.setItem('NorthIsLandObj', JSON.stringify({
     ...NorthIsLandObj,
     token: access_token || '',
-    authority: authority || []
+    authority: authority
   }))
-  // localStorage.setItem('antd-pro-token', JSON.stringify(access_token))
-  // localStorage.setItem('antd-pro-authority', JSON.stringify(authority));
-  // localStorage.setItem('antd-pro-use', JSON.stringify(user));
-  // hard code
-  // reload Authorized component
+
   try {
     if ((window as any).reloadAuthorized) {
       (window as any).reloadAuthorized();
@@ -37,7 +33,7 @@ export function setAuthority(value: any) {
 export interface StateType {
   status?: 'ok' | 'error';
   type?: string;
-  currentAuthority?: 'user' | 'guest' | 'admin';
+  currentAuthority?: 'View' | 'Edit' | 'Super';
 }
 
 export interface ModelType {
@@ -72,11 +68,13 @@ const Model: ModelType = {
         payload: response,
       });
       // Login successfully
-      if (response.access_token) {
+      if (response?.access_token) {
         message.success('登录成功！');
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
+
         let { redirect } = params as { redirect: string };
+
         if (redirect) {
           const redirectUrlParams = new URL(redirect);
           if (redirectUrlParams.origin === urlParams.origin) {
@@ -91,7 +89,7 @@ const Model: ModelType = {
         }
         history.replace(redirect || '/');
       } else {
-        // message.error('登录错误')
+        message.error('登录错误')
       }
     },
 

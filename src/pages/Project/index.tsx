@@ -1,17 +1,28 @@
 // Project
-import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
-import { Avatar, Button, Card, Descriptions, Popconfirm, Result, Space, Input, Statistic } from 'antd'
-import { history, Link, useRequest } from 'umi'
-import { PageContainer } from '@ant-design/pro-layout'
-import ProTable, { ProColumns } from '@ant-design/pro-table'
-import { getLable } from './service'
-import config from '@/utils/config'
-import { SizeType } from 'antd/lib/config-provider/SizeContext'
-import { typeProjectTableListItem } from './types'
-import { PlusOutlined } from '@ant-design/icons'
-import AddProject from './AddProject'
-/** 
- * Preset 
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import {
+  Avatar,
+  Button,
+  Card,
+  Descriptions,
+  Popconfirm,
+  Result,
+  Space,
+  Input,
+  Statistic,
+} from 'antd';
+import { history, Link, useRequest } from 'umi';
+import { PageContainer } from '@ant-design/pro-layout';
+import ProTable, { ProColumns } from '@ant-design/pro-table';
+import { createProject, deleteProject, editeProject, getLable, getProjectList } from './service';
+import config from '@/utils/config';
+import { SizeType } from 'antd/lib/config-provider/SizeContext';
+import { typeProjectTableListItem } from './types';
+import { PlusOutlined } from '@ant-design/icons';
+import AddProject from './AddProject';
+import { message } from 'antd';
+/**
+ * Preset
  */
 const Tablist = [
   {
@@ -34,12 +45,12 @@ const Tablist = [
     tab: '全部（15）',
     key: '5',
   },
-]
-const { Search } = Input
+];
+const { Search } = Input;
 
 const Project: React.FC<{}> = () => {
-  /** 
-   * state 
+  /**
+   * state
    */
   const actionRef = useRef();
   const [size, setSize] = useState<SizeType>('middle');
@@ -48,43 +59,66 @@ const Project: React.FC<{}> = () => {
 
   const [mProjectProps, setMProjectProps] = useState<any>({
     visible: false,
-    objectModal: {}
+    objectModal: {},
   });
 
-
-  /** 
-  * method
-  */
+  /**
+   * method
+   */
   const onTableChange = (p, f, s) => {
     setSorter(s.field || '');
     setSortOrder(s.order || '');
   };
 
   const loadData = async (params) => {
-    const response = await getLable(params);
+    const response = await getProjectList(params);
     return {
       success: response.success,
       ...response.data,
     };
   };
 
+  // 新增项目基础信息
+  const { run: useCreateProject, loading: CpLoading } = useRequest(createProject, {
+    manual: true,
+    onSuccess: () => {
+      message.success('新增成功');
+      actionRef.current.reload();
+    },
+  });
 
+  // 编辑项目基础信息
+  const { run: useEditProject, loading: EpLoading } = useRequest(editeProject, {
+    manual: true,
+    onSuccess: () => {
+      message.success('编辑成功');
+      actionRef.current.reload();
+    },
+  });
 
+  // 删除项目基础信息
+  const { run: useDeleteProject, loading: DpLoading } = useRequest(deleteProject, {
+    manual: true,
+    onSuccess: () => {
+      message.success('删除成功');
+      actionRef.current.reload();
+    },
+  });
 
-  /** 
-   * effct 
+  /**
+   * effct
    */
 
-
-
-  /** 
-   * componentsConfig 
+  /**
+   * componentsConfig
    */
 
   // 顶部提示
   const content = (
     <Descriptions size="small" column={2}>
-      <Descriptions.Item span={2} label="介绍">欢迎使用NID项目管理平台，开始创建一个项目吧！</Descriptions.Item>
+      <Descriptions.Item span={2} label="介绍">
+        欢迎使用NID项目管理平台，开始创建一个项目吧！
+      </Descriptions.Item>
     </Descriptions>
   );
 
@@ -149,15 +183,36 @@ const Project: React.FC<{}> = () => {
       width: 300,
       valueType: 'option',
       render: (_, record) => [
-        <a href="#" key="edit">编辑</a>,
-        <a href="#" key="ok">完成</a>,
-        <a href="#" key="stop">终止</a>,
-        <a href="#" key="ed">暂停</a>,
-        <a href="#" key="res">延期</a>,
+        <a
+          href="#"
+          key="edit"
+          onClick={() => {
+            setMProjectProps({
+              visible: true,
+              objectModal: record,
+            });
+          }}
+        >
+          编辑
+        </a>,
+        <a href="#" key="ok">
+          完成
+        </a>,
+        <a href="#" key="stop">
+          终止
+        </a>,
+        <a href="#" key="ed">
+          暂停
+        </a>,
+        <a href="#" key="res">
+          延期
+        </a>,
         <Popconfirm
           key="delete"
           title="您确定要删除该标注？"
-          onConfirm={() => { }}
+          onConfirm={() => {
+            useDeleteProject([record._id]);
+          }}
           onCancel={() => { }}
           okText="确定"
           cancelText="取消"
@@ -170,14 +225,21 @@ const Project: React.FC<{}> = () => {
 
   // 新增项目按钮
   const NewProject: React.FC<any> = () => {
-    return (<>
-      <Button onClick={() => { setMProjectProps({ visible: true, objectModal: {} }) }} type="primary" size={size}>
-        <PlusOutlined />
-    新增
-  </Button>
-    </>
-    )
-  }
+    return (
+      <>
+        <Button
+          onClick={() => {
+            setMProjectProps({ visible: true, objectModal: {} });
+          }}
+          type="primary"
+          size={size}
+        >
+          <PlusOutlined />
+          新增
+        </Button>
+      </>
+    );
+  };
 
   // modal对话框属性
   const addProjectProps = {
@@ -186,15 +248,18 @@ const Project: React.FC<{}> = () => {
     onCancel: () => {
       setMProjectProps({
         visible: false,
-        objectModal: {}
-      })
+        objectModal: {},
+      });
     },
-    onSubmit: (values: typeProjectCategory) => {
-      // useCreateCategory(values)
-      console.log('values', values);
+    onSubmit: (values: any) => {
+      if (values._id) {
+        useEditProject(values);
+      } else {
+        useCreateProject(values);
+      }
     },
-  }
-  /** 
+  };
+  /**
    * render
    */
   return (
@@ -208,7 +273,9 @@ const Project: React.FC<{}> = () => {
             <Avatar
               shape="square"
               size="large"
-              style={{ width: 110, height: 110, marginRight: 75 }} src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />
+              style={{ width: 110, height: 110, marginRight: 75 }}
+              src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+            />
           </Space>
         }
       >
@@ -226,23 +293,26 @@ const Project: React.FC<{}> = () => {
             onChange={(p, f, s) => onTableChange(p, f, s)}
             pagination={config.paginationDisplay}
             scroll={{ y: 450, x: 1920 }}
-            toolBarRender={() => [
-              <Search key="search" placeholder="按名称查询" />
-            ]}
+            toolBarRender={() => [<Search key="search" placeholder="按名称查询" />]}
           />
         </Card>
         <AddProject {...addProjectProps} />
       </PageContainer>
-      <Button type='primary' onClick={() => {
-        history.push({
-          pathname: '/project/detail',
-          query: {
-            id: '1',
-          },
-        });
-      }}>点击我前往详情页面</Button>
+      <Button
+        type="primary"
+        onClick={() => {
+          history.push({
+            pathname: '/project/detail',
+            query: {
+              id: '1',
+            },
+          });
+        }}
+      >
+        点击我前往详情页面
+      </Button>
     </>
-  )
-}
+  );
+};
 
-export default Project
+export default Project;
