@@ -35,7 +35,7 @@ const AddModal = ({ catalog = {}, visible, onCancel, onSubmit, loading }) => {
   return (
     <Modal
       visible={visible}
-      title={`${catalog.id ? '编辑客户' : '新增客户'}`}
+      title={`${catalog._id ? '编辑项目组' : '新增项目组'}`}
       onCancel={() => close()}
       confirmLoading={loading}
       afterClose={() => clear()}
@@ -47,23 +47,38 @@ const AddModal = ({ catalog = {}, visible, onCancel, onSubmit, loading }) => {
       <Form form={form} layout="horizontal" name="deptForm">
         <Form.Item
           {...config.modalFormItemLayout}
-          label="客户名称"
+          label="项目组名称"
           name="name"
           rules={[
             {
               required: true,
-              message: '请输入客户名称',
+              message: '请输入项目组名称',
             },
             {
-              pattern: config?.exp,
-              message: '客户名称只能包含中文字母数字、下划线',
+              pattern: config?.exp1,
+              message: '项目组名称只能包含中文字母数字、下划线',
             },
-            { max: 15, message: '客户名称不能超过15个字符' },
+            { max: 15, message: '项目组名称不能超过15个字符' },
           ]}
         >
           <Input placeholder="请输入客户名称" />
         </Form.Item>
-        <Form.Item name="id" noStyle>
+
+        <Form.Item
+          {...config.modalFormItemLayout}
+          label="组描述"
+          name="descriptin"
+          rules={[
+            {
+              required: true,
+              message: '请输入组描述',
+            },
+          ]}
+        >
+          <Input.TextArea placeholder="请输入组描述" />
+        </Form.Item>
+
+        <Form.Item name="_id" noStyle>
           <Input type="hidden" />
         </Form.Item>
       </Form>

@@ -1,10 +1,19 @@
 import config from '@/utils/config';
+import { Card, Select } from 'antd';
 import { Form, Input, Modal } from 'antd';
 import React, { useEffect } from 'react';
+import { useState } from 'react';
+import { getUserList } from '../service';
 
-const TextArea = Input.TextArea;
 const AddModal = ({ tag = {}, visible, onCancel, onSubmit, loading }) => {
+
   const [form] = Form.useForm();
+  const [initValueData, setInitValue] = useState({
+    UserList: [],
+    loading: true,
+  });
+
+
   useEffect(() => {
     if (visible) {
       form.setFieldsValue({
@@ -12,6 +21,7 @@ const AddModal = ({ tag = {}, visible, onCancel, onSubmit, loading }) => {
       });
     }
   }, [visible]);
+
   const onOk = () => {
     form
       .validateFields()
@@ -22,24 +32,35 @@ const AddModal = ({ tag = {}, visible, onCancel, onSubmit, loading }) => {
         console.log('Validate Failed:', info);
       });
   };
+
   const close = () => {
     clear();
     onCancel();
   };
+
   const clear = () => {
     form.resetFields();
-    // form.setFieldsValue({
-    //   name: undefined,
-    //   phone: undefined,
-    //   catalogId: undefined,
-    //   id: undefined,
-    // });
   };
+
+  const initValue = async () => {
+    // 获取项目分类列表,获取人员项目
+    let res = await getUserList();
+
+    setInitValue({
+      UserList: res,
+      loading: false,
+    });
+  };
+
+
+  useEffect(() => {
+    initValue()
+  }, [])
 
   return (
     <Modal
       visible={visible}
-      title={`${tag.id ? '编辑人员' : '新增人员'}`}
+      title={`${tag._id ? '编辑人员' : '新增人员'}`}
       onCancel={() => close()}
       confirmLoading={loading}
       afterClose={() => clear()}
@@ -48,50 +69,67 @@ const AddModal = ({ tag = {}, visible, onCancel, onSubmit, loading }) => {
       cancelText="取消"
       onOk={() => onOk()}
     >
-      <Form form={form} layout="horizontal" name="deptForm">
-        <Form.Item
-          {...config.modalFormItemLayout}
-          label="人员名称"
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: '请输入人员名称',
-            },
-            {
-              pattern: config.exp,
-              message: '人员名称只能包含中文字母数字、下划线',
-            },
-            { max: 4, message: '人员名称不能超过10个字符' },
-          ]}
-        >
-          <Input maxLength={4} placeholder="请输入人员名称" />
-        </Form.Item>
-        <Form.Item
-          {...config.modalFormItemLayout}
-          label="手机号"
-          name="phone"
-          validateTrigger={['onChange', 'onBlur']}
-          rules={[
-            {
-              required: true,
-              message: '请输入手机号',
-            },
-            {
-              pattern: config.phone,
-              message: '手机号格式有误！',
-            },
-          ]}
-        >
-          <Input placeholder="请输入手机号" />
-        </Form.Item>
-        <Form.Item name="id" noStyle>
-          <Input type="hidden" />
-        </Form.Item>
-        <Form.Item name="customerId" noStyle>
-          <Input type="hidden" />
-        </Form.Item>
-      </Form>
+      <Card bordered={false} loading={initValueData.loading}>
+        <Form form={form} layout="horizontal" name="deptForm">
+          <Form.Item
+            {...config.modalFormItemLayout}
+            label="人员名称"
+            name="name"
+            rules={[
+              {
+                required: true,
+                message: '请输入人员名称',
+              },
+              {
+                pattern: config.exp1,
+                message: '人员名称只能包含中文字母数字、下划线',
+              },
+            ]}
+          >
+            <Input placeholder="请输入人员名称" />
+          </Form.Item>
+
+          <Form.Item
+            {...config.modalFormItemLayout}
+            label="角色下成员"
+            name="emptyIds"
+            rules={[
+              {
+                required: true,
+                message: '请选择成员',
+              },
+            ]}
+          >
+            <Select placeholder="请选择成员">
+              {initValueData.UserList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            {...config.modalFormItemLayout}
+            label="角色描述"
+            name="descriptin"
+            rules={[
+            ]}
+          >
+            <Input.TextArea placeholder="请输入角色描述" />
+          </Form.Item>
+
+          <Form.Item name="_id" noStyle>
+            <Input type="hidden" />
+          </Form.Item>
+
+          <Form.Item name="originGroupId" noStyle>
+            <Input type="hidden" />
+          </Form.Item>
+        </Form>
+      </Card>
     </Modal>
   );
 };
