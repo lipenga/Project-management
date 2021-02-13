@@ -1,20 +1,15 @@
 // Project
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import {
-  Avatar,
-  Button,
-  Card,
-  Descriptions,
-  Popconfirm,
-  Result,
-  Space,
-  Input,
-  Statistic,
+  Avatar, Button, Card, Descriptions, Popconfirm, Space, Input,
 } from 'antd';
-import { history, Link, useRequest } from 'umi';
+import { history, useRequest } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
-import { createProject, deleteProject, editeProject, getLable, getProjectList } from './service';
+import {
+  createProject, deleteProject, editeProject,
+  getProjectList, getTatoalTableListforProject
+} from './service';
 import config from '@/utils/config';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 import { typeProjectTableListItem } from './types';
@@ -24,28 +19,7 @@ import { message } from 'antd';
 /**
  * Preset
  */
-const Tablist = [
-  {
-    tab: '进行中（2）',
-    key: '1',
-  },
-  {
-    tab: '我创建的（0）',
-    key: '2',
-  },
-  {
-    tab: '已延期（24）',
-    key: '3',
-  },
-  {
-    tab: '未开始（15）',
-    key: '4',
-  },
-  {
-    tab: '全部（15）',
-    key: '5',
-  },
-];
+
 const { Search } = Input;
 
 const Project: React.FC<{}> = () => {
@@ -53,10 +27,11 @@ const Project: React.FC<{}> = () => {
    * state
    */
   const actionRef = useRef();
+  const [Tablist, setTablist] = useState<any>([])
   const [size, setSize] = useState<SizeType>('middle');
   const [sorter, setSorter] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
-
+  const [activeKey, setActiveKey] = useState<string>('3')
   const [mProjectProps, setMProjectProps] = useState<any>({
     visible: false,
     objectModal: {},
@@ -105,9 +80,44 @@ const Project: React.FC<{}> = () => {
     },
   });
 
+  // 获取项目状态数数据统计
+  const { run: useGetTableList, loading: Tlaoding } = useRequest(getTatoalTableListforProject, {
+    manual: true,
+    onSuccess: (res) => {
+      setTablist(
+        [
+          {
+            tab: `进行中（${res.runing}）`,
+            key: '3',
+          },
+          {
+            tab: `我创建的（${res.myCreate}）`,
+            key: '4',
+          },
+          {
+            tab: `已延期（${res.extension}）`,
+            key: '1',
+          },
+          {
+            tab: `未开始（${res.notStarted}）`,
+            key: '0',
+          },
+          {
+            tab: `全部（${res.all}）`,
+            key: '2',
+          },
+        ]
+      )
+    },
+  });
+
+
   /**
    * effct
    */
+  useEffect(() => {
+    useGetTableList()
+  }, [])
 
   /**
    * componentsConfig
@@ -129,6 +139,19 @@ const Project: React.FC<{}> = () => {
       dataIndex: 'name',
       ellipsis: true,
       width: 200,
+      render: (dom, row) => {
+        return <a href="#" onClick={() => {
+          history.push({
+            pathname: '/project/detail',
+            query: {
+              ...row,
+              _id: row!._id,
+            },
+          });
+        }}>
+          {row.name}
+        </a>
+      }
     },
     {
       title: '进度',
@@ -268,6 +291,10 @@ const Project: React.FC<{}> = () => {
         fixedHeader
         content={content}
         tabList={Tablist}
+        tabActiveKey={activeKey}
+        onTabChange={(key) => {
+          setActiveKey(key)
+        }}
         extraContent={
           <Space size={24}>
             <Avatar
@@ -285,7 +312,7 @@ const Project: React.FC<{}> = () => {
             columns={columns}
             actionRef={actionRef}
             request={(params) => loadData(params)}
-            params={{ sorter, sortOrder }}
+            params={{ sorter, sortOrder, projectState: activeKey }}
             size={size}
             rowKey="_id"
             search={false}
@@ -298,19 +325,6 @@ const Project: React.FC<{}> = () => {
         </Card>
         <AddProject {...addProjectProps} />
       </PageContainer>
-      <Button
-        type="primary"
-        onClick={() => {
-          history.push({
-            pathname: '/project/detail',
-            query: {
-              id: '1',
-            },
-          });
-        }}
-      >
-        点击我前往详情页面
-      </Button>
     </>
   );
 };

@@ -4,7 +4,7 @@ import ProTable, { ActionType } from '@ant-design/pro-table';
 import { useRequest } from 'ahooks';
 import { Card, Tree, Input, Space, Popconfirm, Popover, Tag, Tooltip, Button, message } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { delCatalog, delTag, getAll, saveCatalog, saveTag, tagPage } from '../service';
+import { delCatalog, delTag, editeProjectGroup, editProjectGroupRole, getAll, saveCatalog, saveTag, tagPage } from '../service';
 import SplitPane from 'react-split-pane';
 import CatalogModal from '../Components/CatalogModal';
 import TagModal from '../Components/TagModal';
@@ -25,10 +25,10 @@ const ProjectGroup: React.FC<{}> = () => {
   //定义数据存放位置
   const [current, setCurrent] = useState(1);
   const [catalog, setCatalog] = useState([]);
-  //分类弹窗控制变量
+  // 项目组弹窗控制变量
   const [catalogVisible, setCatalogVisible] = useState(false);
   const [selectCatalog, setSelectCatalog] = useState({});
-  //标签弹窗控制变量
+  // 项目内成员弹窗控制变量
   const [visible, setVisible] = useState(false);
   const [selectKey, setSelectKey] = useState(null);
   const [tag, setTag] = useState({});
@@ -48,38 +48,47 @@ const ProjectGroup: React.FC<{}> = () => {
    * method
    */
 
+
+  //  save ProjectGroup Roles
   const { run: runSaveTag } = useRequest(saveTag, {
     manual: true,
     onSuccess: (result, params) => {
       actionRef.current?.reload();
-      if (result.success) {
-        setVisible(false);
-        setTag(undefined);
-        message.success('操作成功');
-      }
+      setVisible(false);
+      setTag(undefined);
+      message.success('操作成功');
     },
   });
 
+  // editProjectRoles
+  const { run: editProjectRoles, } = useRequest(editProjectGroupRole, {
+    manual: true,
+    onSuccess: (result, params) => {
+      actionRef.current?.reload();
+      setVisible(false);
+      setTag(undefined);
+      message.success('操作成功');
+    },
+  });
+
+  // delete ProjectGroup Roles
   const { run: runDelTag } = useRequest(delTag, {
     manual: true,
     onSuccess: (result, params) => {
       actionRef.current?.reload();
-      if (result.success) {
-        setVisible(false);
-        setTag(undefined);
-        message.success('操作成功');
-      }
+      setVisible(false);
+      setTag(undefined);
+      message.success('操作成功');
     },
   });
 
+  // save ProjectGroup tree
   const { loading: loading1, run: saveCatalogRun } = useRequest(saveCatalog, {
     manual: true,
     onSuccess: (result) => {
-      if (result && result.success) {
-        message.success('操作成功');
-        getAllRun();
-        setCatalogVisible(false);
-      }
+      message.success('操作成功');
+      getAllRun();
+      setCatalogVisible(false);
       setSelectCatalog({});
     },
   });
@@ -87,30 +96,40 @@ const ProjectGroup: React.FC<{}> = () => {
   const { loading: loading2, run: delCatalogRun } = useRequest(delCatalog, {
     manual: true,
     onSuccess: (result) => {
-      if (result && result.success) {
-        message.success('操作成功');
-        actionRef.current?.reload();
-        getAllRun();
-        setSelectKey(null);
-      }
+      message.success('操作成功');
+      actionRef.current?.reload();
+      getAllRun();
+      setSelectKey(null);
     },
   });
 
-  //获取数据定义
+  //get proejctGruop tree 
   const { loading, run: getAllRun } = useRequest(getAll, {
     manual: true,
     onSuccess: (result, params) => {
-      if (result.success) {
-        setCatalog(result.data);
-      }
+      setCatalog(result);
     },
   });
 
+  //eidte projectGroup tree 
+  const { loading: ETreelaoding, run: useEditeProjectGroup } = useRequest(editeProjectGroup, {
+    manual: true,
+    onSuccess: (result, params) => {
+      setCatalog(result.data);
+      message.success('操作成功');
+      getAllRun();
+      setCatalogVisible(false);
+      setSelectCatalog({});
+    },
+  });
+
+  // edite projectGrop tree method
   const editCatalog = (data) => {
     setCatalogVisible(true);
     setSelectCatalog(data);
   };
 
+  // projectGrop props
   const catalogModalProps = {
     visible: catalogVisible,
     loading,
@@ -120,39 +139,52 @@ const ProjectGroup: React.FC<{}> = () => {
       setSelectCatalog(undefined);
     },
     onSubmit: (values) => {
-      saveCatalogRun(values);
+      if (values._id) {
+        useEditeProjectGroup(values)
+      } else {
+        saveCatalogRun(values);
+      }
     },
   };
 
+  // delete ProjectGroup tree item
   const deleteCatalog = (id) => {
-    delCatalogRun(id);
+    delCatalogRun([id]);
     setCurrent(1);
   };
 
-  // 编辑标签
+  // 项目组内成员props
   const tagModalProps = {
     visible,
     tag: {
       ...tag,
-      customerId: selectKey !== null && selectKey !== -1 ? selectKey : tag?.customerId,
+      originGroupId: selectKey !== null && selectKey !== -1 ? selectKey : tag?.originGroupId,
     },
     onCancel: () => {
       setVisible(false);
       setTag(undefined);
     },
     onSubmit: (values) => {
-      runSaveTag({ ...values });
+      if (values?._id) {
+        editProjectRoles(values);
+      } else {
+        runSaveTag(values);
+      }
     },
   };
+
+  // edit ProjectGroup Roles method
   const editTag = (tag) => {
     setVisible(true);
     setTag(tag);
   };
 
+  // delete ProjectGroup Roles method
   const del = (id) => {
-    runDelTag(id);
+    runDelTag([id]);
   };
 
+  // tree actions
   const actions = (currentData) => (
     <Space style={{ margin: 0, padding: 0 }}>
       {!currentData && (
@@ -179,7 +211,7 @@ const ProjectGroup: React.FC<{}> = () => {
         <Popconfirm
           title={
             <>
-              此操作将会同步删除客户下的人员，
+              此操作将会同步项目组下的人员，
               <br />
               您确定要删除 <Tag color="red">{currentData.name}</Tag>吗？
             </>
@@ -190,7 +222,7 @@ const ProjectGroup: React.FC<{}> = () => {
               message.error('禁止操作！请先完成编辑');
               return;
             }
-            deleteCatalog(currentData.id);
+            deleteCatalog(currentData._id);
           }}
         >
           <PlusCircleOutlined
@@ -204,19 +236,21 @@ const ProjectGroup: React.FC<{}> = () => {
     </Space>
   );
 
+  // render ProjectGroup Tree
   const renderTreeNodes = (data) => {
-    return data.map((item) => {
+    return data?.map((item) => {
       const title = <span title={item.name}>{item.name}</span>;
       const wrapperTitle = (
         <Popover placement="right" content={actions(item)}>
           {title}
         </Popover>
       );
-      const props = { title: wrapperTitle, key: item.id, isLeaf: true };
+      const props = { title: wrapperTitle, key: item._id, isLeaf: true };
       return <TreeNode {...props} />;
     });
   };
 
+  // load ProjectGroup Roles
   const loadData = async (params) => {
     setCurrent(params.current);
     const response = await tagPage(params);
@@ -271,8 +305,8 @@ const ProjectGroup: React.FC<{}> = () => {
           <>
             <a target="_blank" rel="noopener noreferrer">
               <Popconfirm
-                title="您确认要删除该用户么?"
-                onConfirm={() => del(row.id)}
+                title="您确认要删除该成员么?"
+                onConfirm={() => del(row._id)}
                 okText="是"
                 cancelText="否"
               >
@@ -291,7 +325,7 @@ const ProjectGroup: React.FC<{}> = () => {
         type="primary"
         size={size}
         onClick={() => {
-          selectKey !== null && selectKey !== -1 ? setVisible(true) : message.error('请先选择客户');
+          selectKey !== null && selectKey !== -1 ? setVisible(true) : message.error('请先选择项目组');
         }}
       >
         <PlusCircleOutlined type="icon-icon_add" />
@@ -318,7 +352,7 @@ const ProjectGroup: React.FC<{}> = () => {
             style={{ position: 'relative', overflow: 'visible' }}
           >
             <div>
-              <Card className={style.treeBorder} loading={loading} title="项目内角色" size="small">
+              <Card className={style.treeBorder} loading={loading} title="项目组" size="small">
                 <Tree
                   showIcon
                   showLine
@@ -327,6 +361,8 @@ const ProjectGroup: React.FC<{}> = () => {
                   selectable
                   onSelect={(selectedKeys) => {
                     setCurrent(1);
+                    console.log('selectedKeys', selectedKeys);
+
                     selectedKeys && setSelectKey(selectedKeys[0] || null);
                   }}
                   className={style.hover}
@@ -351,13 +387,13 @@ const ProjectGroup: React.FC<{}> = () => {
               </Card>
             </div>
             <div className="ui-dragPane">
-              <Card title="角色内成员" className={style.treeBorder} size="small">
+              <Card title="项目组内角色" className={style.treeBorder} size="small">
                 <ProTable
                   className="use-proTable"
                   columns={columns}
                   actionRef={actionRef}
                   request={(params) => loadData(params)}
-                  params={{ sorter, sortOrder, customerId: selectKey, name: search }}
+                  params={{ sorter, sortOrder, originGroupId: selectKey, name: search }}
                   size={size}
                   rowKey="id"
                   headerTitle={header}
