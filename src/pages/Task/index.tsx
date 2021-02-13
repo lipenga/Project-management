@@ -84,7 +84,7 @@ const Task: React.FC<{}> = () => {
   // 顶部提示
   const content = (
     <Descriptions size="small" column={2}>
-      <Descriptions.Item span={2} label="介绍">欢迎使用NID项目管理平台，开始创建一个项目吧！</Descriptions.Item>
+      <Descriptions.Item span={2} label="介绍">欢迎使用NID项目管理平台，开始创建一个任务吧！</Descriptions.Item>
     </Descriptions>
   );
 

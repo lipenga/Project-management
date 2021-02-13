@@ -36,7 +36,6 @@ const Project: React.FC<{}> = () => {
    */
 
 
-
   const Dprops = {
     ...projectLableDrawer,
     onCancel: () => {
