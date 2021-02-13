@@ -56,53 +56,59 @@ const AddTask: React.FC<any> = (Props) => {
   const clear = () => {
     form.resetFields();
   };
-  function onChange(value) {
-    console.log(value);
-    alert(1)
-  }
+
   /** 
    * effct 
    */
 
   const initValue = async () => {
     // 获取项目分类列表,获取人员项目
-    let res = await getUserList();
-    let res1 = await getProjectCategoryMapList();
-    let res2 = await getProjectMieageList();
-    let res3 = await getTaskCategoryList()
-    console.log(res3);
+    let UserList = await getUserList();
+    let ProjectCategoryMapList = await getProjectCategoryMapList();
+    let ProjectMieageList = await getProjectMieageList();
+    let TaskCategoryList = await getTaskCategoryList()
+    console.log(TaskCategoryList[0].childrenList[1], TaskCategoryList[0].childrenList[0].title)
     setInitValue({
-      UserList: res,
-      ProjectList: res1.data.data,
-      MieageList: res2.data.data,
+      UserList: UserList,
+      ProjectList: ProjectCategoryMapList.data.data,
+      MieageList: ProjectMieageList.data.data,
       loading: false,
-      taskType: res3,
+      taskType: TaskCategoryList,
+      options: [
+        {
+          value: TaskCategoryList[0].description,
+          label: TaskCategoryList[0].description,
+          children: [
+            {
+              value: TaskCategoryList[0].childrenList[0].description,
+              label: TaskCategoryList[0].childrenList[0].description,
+            },
+            {
+              value: TaskCategoryList[0].childrenList[1].description,
+              label: TaskCategoryList[0].childrenList[1].description,
+            },
+          ],
+        },
+        {
+          value: TaskCategoryList[1].description,
+          label: TaskCategoryList[1].description,
+          children: [
+            {
+              value: TaskCategoryList[1].childrenList[0] ? TaskCategoryList[1].childrenList[0].description : '无',
+              label: TaskCategoryList[1].childrenList[0] ? TaskCategoryList[1].childrenList[0].description : '无',
+            },
+            // {
+            //   value: TaskCategoryList[1].childrenList[1].description,
+            //   label: TaskCategoryList[1].childrenList[1].description,
+            // },
+          ],
+        },
+      ]
 
     });
   };
 
-  const options = [
-    {
-      value: 'zhejiang',
-      label: 'Zhejiang',
-      children: [
-        {
-          value: 'hangzhou',
-          label: 'Hangzhou',
-        },
-      ],
-    },
-    {
-      value: 'jiangsu',
-      label: 'Jiangsu',
-      children: [
-        {
-          value: 'nanjing',
-          label: 'Nanjing',
-        },
-      ],
-    },
-  ];
+
 
   useEffect(() => {
 
@@ -181,9 +187,9 @@ const AddTask: React.FC<any> = (Props) => {
           <Form.Item {...config.modalFormItemLayout} noStyle name="file_id">
             <Input hidden />
           </Form.Item>
-          {/* <Form.Item {...config.modalFormItemLayout} noStyle name="task_tpye">
+          <Form.Item {...config.modalFormItemLayout} noStyle name="task_type">
             <Input hidden />
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item
             {...config.modalFormItemLayout}
@@ -281,20 +287,12 @@ const AddTask: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Select placeholder="请选择所属里程碑">
-              {initValueData.taskType?.map((v) => {
-                return (
-                  <Select.Option value={v._id} key={v._id}>
-                    {v.description}
-                  </Select.Option>
-                );
-              })}
-            </Select>
-            {/* <Cascader
 
-              options={options}
-              onChange={onChange}
-            /> */}
+            <Cascader
+
+              options={initValueData.options}
+
+            />
 
           </Form.Item>
 
@@ -312,54 +310,7 @@ const AddTask: React.FC<any> = (Props) => {
           >
             <TextArea placeholder='描述' />
           </Form.Item>
-          {/* <Form.Item
-            {...config.modalFormItemLayout}
-            label="计划开始时间"
-            name="plan_start_time"
-            rules={[
-              {
 
-                message: '计划开始时间',
-              },
-            ]}
-          >
-            <DatePicker
-
-              onChange={(res) => {
-                console.log('res', res);
-                form.setFieldsValue({
-                  plan_start_time: moment(res[0]).format('x'),
-
-                });
-              }}
-              disabledDate={disabledDate}
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-          </Form.Item>
-          <Form.Item
-            {...config.modalFormItemLayout}
-            label="计划结算时间"
-            name="plan_end_time"
-            rules={[
-              {
-                message: '请选择计划结束时间',
-              },
-            ]}
-          >
-            <DatePicker
-              onChange={(res) => {
-                console.log('res', res);
-                form.setFieldsValue({
-                  plan_end_time: moment(res[0]).format('x'),
-
-                });
-              }}
-
-
-              disabledDate={disabledDate}
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-          </Form.Item> */}
           <Form.Item
             {...config.modalFormItemLayout}
             label="计划起始时间"
