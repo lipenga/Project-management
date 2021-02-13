@@ -4,7 +4,7 @@ import { Avatar, Button, Card, Descriptions, Popconfirm, Result, Space, Input, S
 import { history, Link, useRequest } from 'umi'
 import { PageContainer } from '@ant-design/pro-layout'
 import ProTable, { ProColumns } from '@ant-design/pro-table'
-import { getLable, TaskCreat } from './service'
+import { getTaskList, TaskCreat } from './service'
 import config from '@/utils/config'
 import { SizeType } from 'antd/lib/config-provider/SizeContext'
 import { typeProjectTableListItem } from './types'
@@ -61,7 +61,7 @@ const Task: React.FC<{}> = () => {
   };
 
   const loadData = async (params) => {
-    const response = await getLable(params);
+    const response = await getTaskList(params);
     return {
       success: response.success,
       ...response.data,

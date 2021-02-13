@@ -1,22 +1,33 @@
 // AddProject 
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
 import config from '@/utils/config';
-import { Alert, Form, Input, Modal, Select, DatePicker } from 'antd';
+import { Alert, Form, Input, Modal, Select, DatePicker, Upload, message, Button, Cascader } from 'antd';
+
+import { UploadOutlined } from '@ant-design/icons';
+
 import TextArea from 'antd/lib/input/TextArea';
 import moment from 'moment';
+import { getProjectCategoryMapList, getUserList, getProjectMieageList, getTaskCategoryList } from './service';
 
-// const { RangePicker } = DatePicker;
+const { RangePicker } = DatePicker;
 /** 
  * Preset 
  */
 
-const AddProject: React.FC<any> = (Props) => {
+const AddTask: React.FC<any> = (Props) => {
   const { objectModal = {}, visible, onCancel, onSubmit, loading } = Props
   /** 
    * state 
    */
   const [form] = Form.useForm();
-
+  const [initValueData, setInitValue] = useState({
+    UserList: [],
+    ProjectList: [],
+    loading: true,
+    MieageList: [],
+    taskType: [],
+    options: []
+  });
 
   /** 
    * method
@@ -45,19 +56,68 @@ const AddProject: React.FC<any> = (Props) => {
   const clear = () => {
     form.resetFields();
   };
-
+  function onChange(value) {
+    console.log(value);
+    alert(1)
+  }
   /** 
    * effct 
    */
+
+  const initValue = async () => {
+    // 获取项目分类列表,获取人员项目
+    let res = await getUserList();
+    let res1 = await getProjectCategoryMapList();
+    let res2 = await getProjectMieageList();
+    let res3 = await getTaskCategoryList()
+    console.log(res3);
+    setInitValue({
+      UserList: res,
+      ProjectList: res1.data.data,
+      MieageList: res2.data.data,
+      loading: false,
+      taskType: res3,
+
+    });
+  };
+
+  const options = [
+    {
+      value: 'zhejiang',
+      label: 'Zhejiang',
+      children: [
+        {
+          value: 'hangzhou',
+          label: 'Hangzhou',
+        },
+      ],
+    },
+    {
+      value: 'jiangsu',
+      label: 'Jiangsu',
+      children: [
+        {
+          value: 'nanjing',
+          label: 'Nanjing',
+        },
+      ],
+    },
+  ];
+
   useEffect(() => {
+
     if (visible) {
+      initValue();
+
       form.setFieldsValue({
         ...objectModal,
+        times: [
+          objectModal.plan_start_time ? moment(objectModal.plan_start_time) : undefined,
+          objectModal.plan_end_time ? moment(objectModal.plan_end_time) : undefined,
+        ],
       });
     }
   }, [visible]);
-
-
   /** 
    * componentsConfig 
    */
@@ -68,6 +128,23 @@ const AddProject: React.FC<any> = (Props) => {
     return current && current < moment().endOf('day');
   }
 
+  const UploadProps = {
+    name: 'file_id',
+    // action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+    // headers: {
+    //   authorization: 'authorization-text',
+    // },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  };
 
   /** 
    * render
@@ -94,6 +171,19 @@ const AddProject: React.FC<any> = (Props) => {
             style={{ marginBottom: 10 }}
           />
 
+          <Form.Item {...config.modalFormItemLayout} noStyle name="plan_start_time">
+            <Input hidden />
+          </Form.Item>
+
+          <Form.Item {...config.modalFormItemLayout} noStyle name="plan_end_time">
+            <Input hidden />
+          </Form.Item>
+          <Form.Item {...config.modalFormItemLayout} noStyle name="file_id">
+            <Input hidden />
+          </Form.Item>
+          {/* <Form.Item {...config.modalFormItemLayout} noStyle name="task_tpye">
+            <Input hidden />
+          </Form.Item> */}
 
           <Form.Item
             {...config.modalFormItemLayout}
@@ -148,7 +238,13 @@ const AddProject: React.FC<any> = (Props) => {
             ]}
           >
             <Select placeholder="请选择所属项目">
-              {/* 鲜蘑菇类 */}
+              {initValueData.ProjectList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
@@ -164,7 +260,13 @@ const AddProject: React.FC<any> = (Props) => {
             ]}
           >
             <Select placeholder="请选择所属里程碑">
-              {/* 鲜蘑菇类 */}
+              {initValueData.MieageList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
@@ -179,14 +281,28 @@ const AddProject: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Input />
+            <Select placeholder="请选择所属里程碑">
+              {initValueData.taskType?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.description}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+            {/* <Cascader
+
+              options={options}
+              onChange={onChange}
+            /> */}
+
           </Form.Item>
 
 
           <Form.Item
             {...config.modalFormItemLayout}
             label="描述"
-            name="projectCategoryId"
+            name="task_descrpiton"
             rules={[
               {
                 required: true,
@@ -199,7 +315,7 @@ const AddProject: React.FC<any> = (Props) => {
           {/* <Form.Item
             {...config.modalFormItemLayout}
             label="计划开始时间"
-            name="plan_end_time"
+            name="plan_start_time"
             rules={[
               {
 
@@ -209,7 +325,15 @@ const AddProject: React.FC<any> = (Props) => {
           >
             <DatePicker
 
+              onChange={(res) => {
+                console.log('res', res);
+                form.setFieldsValue({
+                  plan_start_time: moment(res[0]).format('x'),
 
+                });
+              }}
+              disabledDate={disabledDate}
+              format="YYYY-MM-DD HH:mm:ss"
             />
           </Form.Item>
           <Form.Item
@@ -218,16 +342,47 @@ const AddProject: React.FC<any> = (Props) => {
             name="plan_end_time"
             rules={[
               {
-
                 message: '请选择计划结束时间',
               },
             ]}
           >
             <DatePicker
-              disabledDate={disabledDate}
+              onChange={(res) => {
+                console.log('res', res);
+                form.setFieldsValue({
+                  plan_end_time: moment(res[0]).format('x'),
 
+                });
+              }}
+
+
+              disabledDate={disabledDate}
+              format="YYYY-MM-DD HH:mm:ss"
             />
           </Form.Item> */}
+          <Form.Item
+            {...config.modalFormItemLayout}
+            label="计划起始时间"
+
+            rules={[
+              {
+                required: true,
+                message: '请选择计划起始时间',
+              },
+            ]}
+          >
+            <RangePicker
+              onChange={(res) => {
+                console.log('res', res);
+                form.setFieldsValue({
+                  plan_start_time: moment(res[0]).format('x'),
+                  plan_end_time: moment(res[1]).format('x'),
+                });
+              }}
+              disabledDate={disabledDate}
+              format="YYYY-MM-DD HH:mm:ss"
+            />
+          </Form.Item>
           <Form.Item
             {...config.modalFormItemLayout}
             label="预计工时"
@@ -252,7 +407,15 @@ const AddProject: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Input />
+            <Select placeholder="请选择负责人">
+              {initValueData.UserList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
           </Form.Item>
           <Form.Item
             {...config.modalFormItemLayout}
@@ -265,7 +428,15 @@ const AddProject: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Input />
+            <Select placeholder="请选择协助人">
+              {initValueData.UserList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
           </Form.Item>
           <Form.Item
             {...config.modalFormItemLayout}
@@ -278,7 +449,15 @@ const AddProject: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Input />
+            <Select placeholder="确认人">
+              {initValueData.UserList?.map((v) => {
+                return (
+                  <Select.Option value={v._id} key={v._id}>
+                    {v.name}
+                  </Select.Option>
+                );
+              })}
+            </Select>
           </Form.Item>
           <Form.Item
             {...config.modalFormItemLayout}
@@ -308,7 +487,9 @@ const AddProject: React.FC<any> = (Props) => {
               },
             ]}
           >
-            <Input />
+            <Upload {...UploadProps}>
+              <Button icon={<UploadOutlined />}>附件上传</Button>
+            </Upload>,
           </Form.Item>
         </Form>
 
@@ -317,4 +498,4 @@ const AddProject: React.FC<any> = (Props) => {
   )
 }
 
-export default AddProject
+export default AddTask
